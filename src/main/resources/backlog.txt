@@ -1,0 +1,60 @@
+# Search for TODO ygiri across the code base to find places where some of these can be implemented
+UI
+	- Put on phone
+	- Drag & Drop Edit Tree Page!
+	- Cool View tree / graph pages
+	- Great Home Page
+	- Short video of site description
+	- FAQ
+	- About
+	- Contact Us
+	
+Validation
+	- Add extensive user input validation / feed back
+	
+Authentication
+	- Use email / verification token
+	- Two Factor Authentication
+	- Third Party Authentication ( Google, FB )
+	- Allow logout
+	- Allow un-registration
+	
+Features
+	- Allow User to delegate / extend to another user ( pass a token to someone so they can extend the tree )
+		- Kutumbini sends out email with token to User B on behalf of User A
+		- User B will present the token for the fulfillment of the grant from Use A    
+	- Allow download of user tree
+		- as a stand alone html page ( with js/d3 ) so they can view the tree if they have Internet connection for the d3 library fetch
+	- Allow upload of user tree
+	- Allow user to share or keep their data private
+		- private data may be visible to relatives to a degree
+
+Logging
+	- Define important events and log
+
+		
+Database
+	- Add constrains ( person must have an associated user )
+	- Use UUID ( affords portability of data )
+	- Indexes?
+	- Periodically purge expired VerificationTokens
+		
+Testing
+	- Web Tier
+	- Security
+	- Load / performance testing?
+
+Deploy
+	- Get Docker working on Google VM
+	- Setup Google Serverless, embedded data base
+	- Add a separate data base instance
+	- Add kubernetes cluster
+
+Administration
+	- Monitor billing
+	- Monitor availability, performance, error logs
+	- User input / complaints handling plan
+	- Site usage statistics
+	- Define Active / Inactive accounts
+	- How long to keep inactive user data
+	

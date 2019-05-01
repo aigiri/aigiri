@@ -1,0 +1,15 @@
+spring:
+  servlet:
+    multipart:
+      max-file-size: 10000MB
+      max-request-size: 10000MB
+  profiles:
+    #active: prod
+    active: dev
+server:
+  port: 8443
+  ssl:
+    enabled: true
+    key-password: saakshi
+    key-store: classpath:keystore.p12
+    key-store-password: saakshi

@@ -1,1 +1,1 @@
-# aigiri
+Kutumbini is an archive of family relations where a user can create their family tree and connect to other relatives. They may find they are connected to a large community. They can optionally choose to make some of their data viewable to all users. Users can view the graph that is shared by others but can modify only their own data. It is based on Java, Spring, Neo4j graph data base, D3.JS.
