@@ -161,6 +161,29 @@ public class UserService implements IUserService {
     }
 
     @Override
+    public String validateGrantAccess(String token) {
+        final VerificationToken verificationToken = tokenRepository.findByToken(token);
+        if (verificationToken == null) {
+            return TOKEN_INVALID;
+        }
+
+        final User user = verificationToken.getUser();
+        final Calendar cal = Calendar.getInstance();
+        if ((verificationToken.getExpiryDate()
+            .getTime()
+            - cal.getTime()
+                .getTime()) <= 0) {
+            tokenRepository.delete(verificationToken);
+            return TOKEN_EXPIRED;
+        }
+
+        user.setEnabled(true);
+        tokenRepository.delete(verificationToken);
+        userRepository.save(user);
+        return TOKEN_VALID;
+    }
+
+    @Override
     public String validateVerificationToken(String token) {
         final VerificationToken verificationToken = tokenRepository.findByToken(token);
         if (verificationToken == null) {

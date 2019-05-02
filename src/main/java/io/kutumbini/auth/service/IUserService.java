@@ -48,4 +48,6 @@ public interface IUserService {
 
     List<String> getUsersFromSessionRegistry();
 
+	String validateGrantAccess(String token);
+
 }

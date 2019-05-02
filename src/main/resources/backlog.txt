@@ -5,6 +5,7 @@ UI
 	- Cool View tree / graph pages
 	- Great Home Page
 	- Short video of site description
+	- Legal -- Kutumbini not liable -- user acceptance required
 	- FAQ
 	- About
 	- Contact Us

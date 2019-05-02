@@ -23,7 +23,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -64,7 +63,6 @@ import io.kutumbini.auth.web.util.GenericResponse;
  * SOFTWARE.
  *
  */
-
 @Controller
 public class RegistrationController {
 	private final Logger LOGGER = LoggerFactory.getLogger(getClass());
@@ -92,20 +90,6 @@ public class RegistrationController {
 
 	public RegistrationController() {
 		super();
-	}
-
-	/**
-	 * 
-	 * @param email of the user ( or potential user )
-	 * @param accessLevel ( Peripheral or Full )
-	 * @return
-	 */
-	@GetMapping("/user/grantAccessToAnotherUser")
-	@ResponseBody
-	public GenericResponse grantAccessToAnotherUser(final HttpServletRequest request, String email, String accessLevel) {
-		final VerificationToken newToken = userService.createVerificationTokenForUser(getUser(), UUID.randomUUID().toString());
-		mailSender.send(constructResendVerificationTokenEmail(getAppUrl(request), request.getLocale(), newToken, getUser()));
-		return new GenericResponse(messages.getMessage("message.grantAccess.sent", new String[] {email}, request.getLocale()));
 	}
 
 	// Registration
@@ -215,14 +199,6 @@ public class RegistrationController {
 
 	// ============== NON-API ============
 
-	private SimpleMailMessage constructGrantAuthorityVerificationTokenEmail(final String contextPath, final Locale locale,
-			final VerificationToken newToken, final String fromName, final String emailTo) {
-		final String grantFulfillUrl = contextPath + "/user/grantFulfill?token=" + newToken.getToken();
-		final String message = messages.getMessage("message.grant.bestow", new String[] {fromName}, locale);
-		return constructEmail("An invitation from Kutumbini on behalf of " + fromName + " to create/extend your family tree " + fromName, 
-				message + " \r\n" + grantFulfillUrl, emailTo);
-	}
-
 	private SimpleMailMessage constructResendVerificationTokenEmail(final String contextPath, final Locale locale,
 			final VerificationToken newToken, final User user) {
 		final String confirmationUrl = contextPath + "/registrationConfirm.html?token=" + newToken.getToken();
@@ -247,7 +223,7 @@ public class RegistrationController {
 	}
 
 	private String getAppUrl(HttpServletRequest request) {
-		return "http://" + request.getServerName() + ":" + request.getServerPort() + request.getContextPath();
+		return env.getProperty("url.scheme") + request.getServerName() + ":" + request.getServerPort() + request.getContextPath();
 	}
 
 	public void authWithHttpServletRequest(HttpServletRequest request, String username, String password) {

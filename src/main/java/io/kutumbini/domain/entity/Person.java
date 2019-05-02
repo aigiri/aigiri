@@ -2,7 +2,9 @@ package io.kutumbini.domain.entity;
 
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.neo4j.ogm.annotation.GeneratedValue;
 import org.neo4j.ogm.annotation.Id;
@@ -39,12 +41,12 @@ public class Person {
 	
 	// outgoing relation by default
 	@Relationship(RELATION.PARENT)
-	private List<Person> parents = new ArrayList<>();
+	private Set<Person> parents = new HashSet<>();
 
 //	@JsonIgnoreProperties is for tools performing JSON serialization, to prevent infinite loop, spouse <-> spouse 
 	@JsonIgnoreProperties("spouse")
 	@Relationship(RELATION.SPOUSE)
-	private List<Person> spouses = new ArrayList<>();
+	private Set<Person> spouses = new HashSet<>();
 
 	public Person() {
 	}
@@ -87,15 +89,18 @@ public class Person {
 		this.parents.add(p);
 	}
 	
-	public List<Person> getParents() {
+	public Set<Person> getParents() {
 		return parents;
 	}
 
 	public void addSpouse(Person spouse) {
-		this.spouses.add(spouse);
+		if (!spouses.contains(spouse)) {
+			spouses.add(spouse);
+			spouse.addSpouse(this);
+		}
 	}
 	
-	public List<Person> getSpouses() {
+	public Set<Person> getSpouses() {
 		return spouses;
 	}
 

@@ -79,7 +79,7 @@ public class FamilyTreeServiceTest {
 		Collection nodes = (Collection) map.get("nodes");
 		Collection links = (Collection) map.get("links");
 		assertEquals("number of nodes", 4, nodes.size());
-		assertEquals("number of links", 3, links.size());
+		assertEquals("number of links", 4, links.size());
 	}
 
 	@SuppressWarnings("unchecked")

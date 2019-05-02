@@ -29,12 +29,6 @@ public class DevData {
 	@Autowired
 	private UserRepository userRepository;
 	
-	public User u_amitabh = new User();
-	public User u_jaya = new User();
-	public User u_abhishek = new User();
-	public User u_gabbar = new User();
-	public User u_aishwarya = new User();
-
 //	@PostConstruct
 	private void loadData() throws IOException {
 		Path path = Paths.get("src/test/resources/test.cypher");
@@ -50,6 +44,12 @@ public class DevData {
 //	@PostConstruct
 	private void setup() {
 		
+		User u_amitabh = new User();
+		User u_jaya = new User();
+		User u_abhishek = new User();
+		User u_gabbar = new User();
+		User u_aishwarya = new User();
+
 		//**************************************************** set up users
 		// no delegated nodes
 		u_amitabh.setEmail("amitabh@bollywood");

@@ -1,8 +1,10 @@
 package io.kutumbini.test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import java.util.Collection;
+import java.util.Optional;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -80,12 +82,24 @@ public class RepositoryTest {
 
 		Collection<Person> u_abhishek_persons = personRepository.userEditableFamily(data.u_abhishek.getEmail());
 		assertEquals("u_abhishek_persons", 3, u_abhishek_persons.size());
+
+		Optional<Person> optional = u_abhishek_persons.stream().filter(p -> p.getFirstname().equals("Abhishek")).findAny();
+		assertTrue(optional.isPresent());
+		assertEquals("relations", 2, optional.get().getRelations().size());
+
+		Optional<Person> optnl = u_abhishek_persons.stream().filter(p -> p.getFirstname().equals("Amitabh")).findAny();
+		assertTrue(optnl.isPresent());
+		assertEquals("relations", 1, optnl.get().getRelations().size());
 	}
 
 	@Test
 	public void userExtendedFamily() {
 		Collection<Person> u_amitabh_persons = personRepository.userExtendedFamily(data.u_amitabh.getEmail(), 1000);
 		assertEquals("u_amitabh_persons", 3, u_amitabh_persons.size());
-	}
+
+		Optional<Person> optional = u_amitabh_persons.stream().filter(p -> p.getFirstname().equals("Abhishek")).findAny();
+		assertTrue(optional.isPresent());
+		assertEquals("relations", 2, optional.get().getRelations().size());
+}
 
 }
