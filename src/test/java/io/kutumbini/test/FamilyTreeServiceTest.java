@@ -53,16 +53,16 @@ public class FamilyTreeServiceTest {
 	}
  
 	@Test
-	public void findPerson() {
-		Optional<Person> optional = personRepository.findPerson(data.u_amitabh.getEmail(), "Amitabh", "Bachchan");
-		assertTrue(optional.isPresent());
+	public void findPersons() {
+		List<Person> persons = personRepository.findPersons(data.u_amitabh.getEmail(), "Amitabh", "Bachchan");
+		assertEquals(1, persons.size());
 	}
 	
 	@Test(expected = ValidationException.class)
 	public void illegalParentCycle() {
-		Optional<Person> optional = personRepository.findPerson(data.u_abhishek.getEmail(), "Abhishek", "Bachchan");
-		assertTrue(optional.isPresent());
-		Person abhishek = optional.get();
+		List<Person> persons = personRepository.findPersons(data.u_abhishek.getEmail(), "Abhishek", "Bachchan");
+		assertTrue(persons.size() == 1);
+		Person abhishek = persons.get(0);
 		
 		Optional<Person> optional1 = abhishek.getParents().stream().filter(p -> p.getFirstname().equals("Amitabh")).findAny();
 		assertTrue(optional1.isPresent());

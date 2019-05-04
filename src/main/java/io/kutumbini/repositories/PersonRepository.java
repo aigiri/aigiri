@@ -35,6 +35,6 @@ public interface PersonRepository extends Neo4jRepository<Person, Long> {
 	List<Person> userExtendedFamily(String userEmail, int limit);
     
     @Query("MATCH (p:Person {firstname: {1}, lastname: {2}})--(:User)-[*0..2]->(:User {email: {0}}) RETURN p")
-    Optional<Person> findPerson(String userEmail, String firstname, String lastname);
+    List<Person> findPersons(String userEmail, String firstname, String lastname);
     
 }

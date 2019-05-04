@@ -19,6 +19,7 @@ import io.kutumbini.auth.persistence.model.User;
 import io.kutumbini.domain.entity.Person;
 import io.kutumbini.domain.relationship.RELATION;
 import io.kutumbini.repositories.PersonRepository;
+import io.kutumbini.validation.ValidationException;
 
 @Service
 public class FamilyTreeService {
@@ -143,12 +144,17 @@ public class FamilyTreeService {
 	}
 
 	// TODO ygiri should be in a transaction
-	public void addPerson(User user, String firstname, String lastname, Long fromNodeID, String relation) {
+	public void addPerson(User user, String firstname, String lastname, Long nodeId, String relation, Long toNodeId) {
 		
-		Optional<Person> optional = personRepository.findPerson(user.getEmail(), firstname, lastname);
 		Person person = null;
-		if (optional.isPresent()) {
-			person = optional.get();
+		if (nodeId != null) {
+			Optional<Person> optional = personRepository.findById(nodeId);
+			if (optional.isPresent()) {
+				person = optional.get();
+			}
+			else {
+				throw new ValidationException("There is person with id " + nodeId);
+			}
 		}
 		else {
 			person = new Person(firstname, lastname, user);
@@ -158,7 +164,7 @@ public class FamilyTreeService {
 		person.setUser(user);
 		
 		// add relation
-		Optional<Person> related = personRepository.findById(fromNodeID);
+		Optional<Person> related = personRepository.findById(toNodeId);
 		if (related.isPresent()) {
 			if (relation.equals(RELATION.PARENT)) {
 				person.addParent(related.get());

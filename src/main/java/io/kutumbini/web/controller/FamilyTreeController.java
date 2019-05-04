@@ -23,9 +23,9 @@ public class FamilyTreeController {
 	private FamilyTreeService familyTreeService;
 
 	@GetMapping("/editTree")
-	public String editTree(@RequestParam String firstname, @RequestParam String lastname, @RequestParam Long fromNodeID, @RequestParam String relation) {
+	public String editTree(String firstname, String lastname, Long nodeId, String relation, Long toNodeId) {
 		User user = getUser();
-		familyTreeService.addPerson(user, firstname,lastname, fromNodeID, relation);
+		familyTreeService.addPerson(user, firstname, lastname, nodeId, relation, toNodeId);
 		return familyTreeService.userEditableTree(user, 1000);
 	}
 
