@@ -17,9 +17,11 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import io.kutumbini.auth.persistence.dao.UserRepository;
+import io.kutumbini.auth.persistence.dao.GrantVerificationTokenRepository;
 import io.kutumbini.auth.persistence.dao.PasswordResetTokenRepository;
+import io.kutumbini.auth.persistence.dao.UserRepository;
 import io.kutumbini.auth.persistence.dao.VerificationTokenRepository;
+import io.kutumbini.auth.persistence.model.GrantVerificationToken;
 import io.kutumbini.auth.persistence.model.PasswordResetToken;
 import io.kutumbini.auth.persistence.model.User;
 import io.kutumbini.auth.persistence.model.VerificationToken;
@@ -35,6 +37,9 @@ public class UserService implements IUserService {
 
     @Autowired
     private VerificationTokenRepository tokenRepository;
+
+    @Autowired
+    private GrantVerificationTokenRepository grantTokenRepository;
 
     @Autowired
     private PasswordResetTokenRepository passwordTokenRepository;
@@ -108,11 +113,31 @@ public class UserService implements IUserService {
 
     // for kutumbini
     @Override
-    public VerificationToken createGrantVerificationToken(final User user, final String token, short accessLevel) {
-        final VerificationToken newToken = new VerificationToken(token, user);
+    public GrantVerificationToken createGrantVerificationToken(final User user, final String token, String grantEmail, short accessLevel) {
+        final GrantVerificationToken newToken = new GrantVerificationToken(token, user);
         newToken.setDelegateGrantAccessLevel(accessLevel);
-        tokenRepository.save(newToken);
+        newToken.setEmailTo(grantEmail);
+        grantTokenRepository.save(newToken);
         return newToken;
+    }
+
+    // for kutumbini
+    @Override
+    public GrantVerificationToken getGrantVerificationToken(String token) {
+        final GrantVerificationToken verificationToken = grantTokenRepository.findByToken(token);
+        if (verificationToken == null) {
+            return null;
+        }
+
+        final Calendar cal = Calendar.getInstance();
+        if ((verificationToken.getExpiryDate()
+            .getTime()
+            - cal.getTime()
+                .getTime()) <= 0) {
+        	grantTokenRepository.delete(verificationToken);
+            return null;
+        }
+        return verificationToken;
     }
 
     @Override
@@ -167,27 +192,6 @@ public class UserService implements IUserService {
     @Override
     public boolean checkIfValidOldPassword(final User user, final String oldPassword) {
         return passwordEncoder.matches(oldPassword, user.getPassword());
-    }
-
-    // for kutumbini
-    @Override
-    public VerificationToken getGrantVerificationToken(String token) {
-        final VerificationToken verificationToken = tokenRepository.findByToken(token);
-        if (verificationToken == null) {
-            return null;
-        }
-
-        final Calendar cal = Calendar.getInstance();
-        if ((verificationToken.getExpiryDate()
-            .getTime()
-            - cal.getTime()
-                .getTime()) <= 0) {
-            tokenRepository.delete(verificationToken);
-            return null;
-        }
-
-        tokenRepository.delete(verificationToken);
-        return verificationToken;
     }
 
     @Override

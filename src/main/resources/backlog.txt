@@ -21,14 +21,14 @@ Authentication
 	- Allow un-registration
 	
 Features
+	- Allow user to share or keep their data private
+		- private data may be visible to relatives to a degree
 	- Allow User to delegate / extend to another user ( pass a token to someone so they can extend the tree )
 		- Kutumbini sends out email with token to User B on behalf of User A
 		- User B will present the token for the fulfillment of the grant from Use A    
 	- Allow download of user tree
 		- as a stand alone html page ( with js/d3 ) so they can view the tree if they have Internet connection for the d3 library fetch
 	- Allow upload of user tree
-	- Allow user to share or keep their data private
-		- private data may be visible to relatives to a degree
 
 Logging
 	- Define important events and log

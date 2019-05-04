@@ -61,7 +61,7 @@ public class AdminService {
 								nodes.add(map("label", "user" + "[" + user.getRoles() + "]", "email", user.getEmail()));});
 
 		List<Map<String, Object>> rels = new ArrayList<>();
-		users.forEach(u -> u.getDelegatedFull().forEach(r -> rels.add(map("source", userIndex.get(u), "target", userIndex.get(r)))));
+		users.forEach(u -> u.getDelegatedInComingFull().forEach(r -> rels.add(map("source", userIndex.get(u), "target", userIndex.get(r)))));
 				
 		return map("nodes", nodes, "links", rels);
 	}

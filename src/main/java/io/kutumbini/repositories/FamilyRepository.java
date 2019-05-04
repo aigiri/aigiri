@@ -11,6 +11,7 @@ import io.kutumbini.domain.entity.Person;
 @RepositoryRestResource()
 public interface FamilyRepository extends Neo4jRepository<Person, Long> {
 	
+	// TODO ygiri make sure delegation results are based on the direction of the DELEGATE relation
     // persons owned by the user or delegated to them by another user
 //    @Query("MATCH (p:Person)--(:User {email: {0}})  OPTIONAL MATCH (q:Person)--(:User)-[*1..2]->(:User {email: {0}}) RETURN p,q")
 //    @Query("MATCH (:Person)-[r*0..1]-(p:Person)--(:User)-[*0..2]->(:User {email: {0}}) RETURN p,r")
