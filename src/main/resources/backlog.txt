@@ -35,7 +35,7 @@ Logging
 
 		
 Database
-	- Add constrains ( person must have an associated user )
+	- Add constraints ( person must have an associated user )
 	- Use UUID ( affords portability of data )
 	- Indexes?
 	- Periodically purge expired VerificationTokens
