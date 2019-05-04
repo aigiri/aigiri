@@ -30,8 +30,8 @@ public interface PersonRepository extends Neo4jRepository<Person, Long> {
 	List<Person> userEditableFamily(String userEmail);
 
     // persons owned by the user and their relations
-//    @Query("MATCH (:User {email: {0}})--(p:Person)-[r*]-(q:Person) RETURN p,q,r LIMIT {1}")
-    @Query("MATCH (:User {email: {0}})--(:Person)-[*]-(p:Person) RETURN p LIMIT {1}")
+    @Query("MATCH (:User {email: {0}})--(p:Person)-[r*]-(q:Person) RETURN p,q,r LIMIT {1}")
+//    @Query("MATCH (:User {email: {0}})--(:Person)-[*]-(p:Person) RETURN p LIMIT {1}")
 	List<Person> userExtendedFamily(String userEmail, int limit);
     
     @Query("MATCH (p:Person {firstname: {1}, lastname: {2}})--(:User)-[*0..2]->(:User {email: {0}}) RETURN p")

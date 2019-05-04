@@ -48,6 +48,10 @@ public interface IUserService {
 
     List<String> getUsersFromSessionRegistry();
 
-	String validateGrantAccess(String token);
+    // for kutumbini
+    VerificationToken getGrantVerificationToken(String token);
+
+	// for kutumbini
+	VerificationToken createGrantVerificationToken(User user, String token, short accessLevel);
 
 }

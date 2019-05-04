@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import io.kutumbini.auth.persistence.dao.UserRepository;
 import io.kutumbini.auth.persistence.model.User;
 import io.kutumbini.auth.persistence.model.VerificationToken;
 import io.kutumbini.auth.service.IUserService;
@@ -27,6 +28,12 @@ import io.kutumbini.auth.web.util.GenericResponse;
 @Controller
 public class UserController {
 	private final Logger LOGGER = LoggerFactory.getLogger(getClass());
+	
+	private static final String DELEGATE_GRANT_ACCESS_LEVEL_FULL = "full";
+	private static final String DELEGATE_GRANT_ACCESS_LEVEL_PERIPHERAL = "peripheral";
+	
+	@Autowired
+	private UserRepository userRepository;
 
 	@Autowired
 	private IUserService userService;
@@ -43,7 +50,7 @@ public class UserController {
 	public UserController() {
 		super();
 	}
-
+	
 	/**
 	 * 
 	 * @param fromName    the name of the sender
@@ -54,15 +61,24 @@ public class UserController {
 	@GetMapping("/user/grantFulfill")
 	@ResponseBody
 	public GenericResponse grantFulfill(final HttpServletRequest request, String token) {
-		final String result = userService.validateVerificationToken(token);
-		if (result.equals("valid")) {
-			return new GenericResponse(
-					messages.getMessage("message.grant.sent.confirmation", null, request.getLocale()));			
+		final VerificationToken result = userService.getGrantVerificationToken(token);
+		if (result == null || result.getDelegateGrantAccessLevel() * result.getDelegateGrantAccessLevel() != result.getDelegateGrantAccessLevel()) {
+			// result is null or, not 0 or 1
+			return new GenericResponse(messages.getMessage("message.grant.token.invalid", null, request.getLocale()));			
 		}
 		else {
-			return new GenericResponse(
-					messages.getMessage("message.grant.sent.confirmation", null, request.getLocale()));
-
+			User grantor = result.getUser();
+			User user = getUser();
+			if (result.getDelegateGrantAccessLevel() == 0) {
+				grantor.addDelagatedPeripheral(user);
+				userRepository.save(grantor);
+			}
+			else if (result.getDelegateGrantAccessLevel() == 1) {
+				grantor.addDelagatedFull(user);
+				userRepository.save(grantor);
+			}
+			
+			return new GenericResponse(messages.getMessage("message.grant.fulfilled", null, request.getLocale()));
 		}
 	}
 
@@ -70,15 +86,15 @@ public class UserController {
 	 * 
 	 * @param fromName    the name of the sender
 	 * @param emailTo     the email of the user ( or potential user )
-	 * @param accessLevel ( Peripheral or Full )
+	 * @param accessLevel ( 'peripheral' or 'full' )
 	 * @return
 	 */
 	@GetMapping("/user/grantAccess")
 	@ResponseBody
 	public GenericResponse grantAccessToAnotherUser(final HttpServletRequest request, String fromName, String emailTo,
 			String accessLevel) {
-		final VerificationToken newToken = userService.createVerificationTokenForUser(getUser(),
-				UUID.randomUUID().toString());
+		final VerificationToken newToken = userService.createGrantVerificationToken(getUser(),
+				UUID.randomUUID().toString(), (short) (DELEGATE_GRANT_ACCESS_LEVEL_FULL.equals(accessLevel)? 1 : 0));
 		mailSender.send(constructGrantAuthorityVerificationTokenEmail(getAppUrl(request), request.getLocale(), newToken,
 				fromName, emailTo));
 		return new GenericResponse(

@@ -21,7 +21,11 @@ public class VerificationToken {
     private User user;
 
     private Date expiryDate;
-
+    
+    // added for kutumbini
+    // 0 for peripheral, 1 for full
+    private short delegateGrantAccessLevel = -1;
+    
     public VerificationToken() {
         super();
     }
@@ -69,6 +73,14 @@ public class VerificationToken {
         this.expiryDate = expiryDate;
     }
 
+    public short getDelegateGrantAccessLevel() {
+    	return delegateGrantAccessLevel;
+    }
+    
+    public void setDelegateGrantAccessLevel(short delegateGrantAccessLevel) {
+    	this.delegateGrantAccessLevel = delegateGrantAccessLevel;
+    }
+    
     private Date calculateExpiryDate(final int expiryTimeInMinutes) {
         final Calendar cal = Calendar.getInstance();
         cal.setTimeInMillis(new Date().getTime());

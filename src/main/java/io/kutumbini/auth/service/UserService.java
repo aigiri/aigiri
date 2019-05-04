@@ -106,6 +106,15 @@ public class UserService implements IUserService {
         userRepository.delete(user);
     }
 
+    // for kutumbini
+    @Override
+    public VerificationToken createGrantVerificationToken(final User user, final String token, short accessLevel) {
+        final VerificationToken newToken = new VerificationToken(token, user);
+        newToken.setDelegateGrantAccessLevel(accessLevel);
+        tokenRepository.save(newToken);
+        return newToken;
+    }
+
     @Override
     public VerificationToken createVerificationTokenForUser(final User user, final String token) {
         final VerificationToken newToken = new VerificationToken(token, user);
@@ -160,27 +169,25 @@ public class UserService implements IUserService {
         return passwordEncoder.matches(oldPassword, user.getPassword());
     }
 
+    // for kutumbini
     @Override
-    public String validateGrantAccess(String token) {
+    public VerificationToken getGrantVerificationToken(String token) {
         final VerificationToken verificationToken = tokenRepository.findByToken(token);
         if (verificationToken == null) {
-            return TOKEN_INVALID;
+            return null;
         }
 
-        final User user = verificationToken.getUser();
         final Calendar cal = Calendar.getInstance();
         if ((verificationToken.getExpiryDate()
             .getTime()
             - cal.getTime()
                 .getTime()) <= 0) {
             tokenRepository.delete(verificationToken);
-            return TOKEN_EXPIRED;
+            return null;
         }
 
-        user.setEnabled(true);
         tokenRepository.delete(verificationToken);
-        userRepository.save(user);
-        return TOKEN_VALID;
+        return verificationToken;
     }
 
     @Override
