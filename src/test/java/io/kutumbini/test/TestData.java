@@ -6,13 +6,13 @@ import org.springframework.stereotype.Component;
 import io.kutumbini.auth.persistence.dao.UserRepository;
 import io.kutumbini.auth.persistence.model.User;
 import io.kutumbini.domain.entity.Person;
-import io.kutumbini.repositories.PersonRepository;
+import io.kutumbini.repositories.FamilyRepository;
 
 @Component
 public class TestData {
 	
 	@Autowired
-	private PersonRepository personRepository;
+	private FamilyRepository personRepository;
 
 	@Autowired
 	private UserRepository userRepository;

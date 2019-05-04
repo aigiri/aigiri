@@ -23,7 +23,8 @@ import org.springframework.transaction.annotation.Transactional;
 import io.kutumbini.auth.persistence.model.User;
 import io.kutumbini.config.AppConfig;
 import io.kutumbini.domain.entity.Person;
-import io.kutumbini.repositories.PersonRepository;
+import io.kutumbini.repositories.FamilyRepository;
+import io.kutumbini.repositories.PublicRepository;
 import io.kutumbini.services.FamilyTreeService;
 import io.kutumbini.validation.ValidationException;
 
@@ -41,7 +42,10 @@ public class FamilyTreeServiceTest {
 	private FamilyTreeService familyTreeService;
 	
 	@Autowired
-	private PersonRepository personRepository;
+	private FamilyRepository familyRepository;
+	
+	@Autowired
+	private PublicRepository publicRepository;
 	
 	// this does the data setup
 	@Autowired
@@ -54,13 +58,13 @@ public class FamilyTreeServiceTest {
  
 	@Test
 	public void findPersons() {
-		List<Person> persons = personRepository.findPersons(data.u_amitabh.getEmail(), "Amitabh", "Bachchan");
+		List<Person> persons = familyRepository.findPersons(data.u_amitabh.getEmail(), "Amitabh", "Bachchan");
 		assertEquals(1, persons.size());
 	}
 	
 	@Test(expected = ValidationException.class)
 	public void illegalParentCycle() {
-		List<Person> persons = personRepository.findPersons(data.u_abhishek.getEmail(), "Abhishek", "Bachchan");
+		List<Person> persons = familyRepository.findPersons(data.u_abhishek.getEmail(), "Abhishek", "Bachchan");
 		assertTrue(persons.size() == 1);
 		Person abhishek = persons.get(0);
 		
@@ -87,7 +91,7 @@ public class FamilyTreeServiceTest {
 	public void publicTree() throws Exception {
 		String json = familyTreeService.publicTree(1000);
 		// assert against some person
-		List<Person> plist = personRepository.persons(1);
+		List<Person> plist = publicRepository.persons(1);
 		assertTrue(json.contains(plist.get(0).getFullname()));
 	}
 

@@ -19,7 +19,8 @@ import io.kutumbini.auth.persistence.dao.UserRepository;
 import io.kutumbini.auth.persistence.model.User;
 import io.kutumbini.config.AppConfig;
 import io.kutumbini.domain.entity.Person;
-import io.kutumbini.repositories.PersonRepository;
+import io.kutumbini.repositories.FamilyRepository;
+import io.kutumbini.repositories.PublicRepository;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = AppConfig.class)
@@ -28,7 +29,10 @@ import io.kutumbini.repositories.PersonRepository;
 public class RepositoryTest {
 
 	@Autowired
-	private PersonRepository personRepository;
+	private PublicRepository publicRepository;
+	
+	@Autowired
+	private FamilyRepository familyRepository;
 
 	@Autowired
 	private UserRepository userRepository;
@@ -49,7 +53,7 @@ public class RepositoryTest {
 
 	@Test
 	public void persons() {
-		Collection<Person> persons = personRepository.persons(1000);
+		Collection<Person> persons = publicRepository.persons(1000);
 		assertEquals(4, persons.size());
 	}
 
@@ -57,15 +61,15 @@ public class RepositoryTest {
 	public void userRequired() {
 		// should not be able to save Person without User set on it
 		String lastname = "Doe";
-		personRepository.save(new Person(null, lastname, null));
-		Collection<Person> result = personRepository.findByLastname(lastname);
+		familyRepository.save(new Person(null, lastname, null));
+		Collection<Person> result = publicRepository.findByLastname(lastname);
 		assertEquals("result size", 0, result.size());
 	}
 	
 	@Test
 	public void testFindByLastname() {
 		String lastname = "Bachchan";
-		Collection<Person> result = personRepository.findByLastname(lastname);
+		Collection<Person> result = publicRepository.findByLastname(lastname);
 		assertEquals("result size", 3, result.size());
 	}
 
@@ -77,10 +81,10 @@ public class RepositoryTest {
 
 	@Test
 	public void userEditableFamily() {
-		Collection<Person> u_amitabh_persons = personRepository.userEditableFamily(data.u_amitabh.getEmail());
+		Collection<Person> u_amitabh_persons = familyRepository.userEditableFamily(data.u_amitabh.getEmail());
 		assertEquals("u_amitabh_persons", 1, u_amitabh_persons.size());
 
-		Collection<Person> u_abhishek_persons = personRepository.userEditableFamily(data.u_abhishek.getEmail());
+		Collection<Person> u_abhishek_persons = familyRepository.userEditableFamily(data.u_abhishek.getEmail());
 		assertEquals("u_abhishek_persons", 3, u_abhishek_persons.size());
 
 		Optional<Person> optional = u_abhishek_persons.stream().filter(p -> p.getFirstname().equals("Abhishek")).findAny();
@@ -94,7 +98,7 @@ public class RepositoryTest {
 
 	@Test
 	public void userExtendedFamily() {
-		Collection<Person> u_amitabh_persons = personRepository.userExtendedFamily(data.u_amitabh.getEmail(), 1000);
+		Collection<Person> u_amitabh_persons = familyRepository.userExtendedFamily(data.u_amitabh.getEmail(), 1000);
 		assertEquals("u_amitabh_persons", 3, u_amitabh_persons.size());
 
 		Optional<Person> optional = u_amitabh_persons.stream().filter(p -> p.getFirstname().equals("Abhishek")).findAny();

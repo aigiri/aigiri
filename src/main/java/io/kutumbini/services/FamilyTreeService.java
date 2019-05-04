@@ -18,7 +18,8 @@ import org.springframework.transaction.annotation.Transactional;
 import io.kutumbini.auth.persistence.model.User;
 import io.kutumbini.domain.entity.Person;
 import io.kutumbini.domain.relationship.RELATION;
-import io.kutumbini.repositories.PersonRepository;
+import io.kutumbini.repositories.FamilyRepository;
+import io.kutumbini.repositories.PublicRepository;
 import io.kutumbini.validation.ValidationException;
 
 @Service
@@ -27,11 +28,14 @@ public class FamilyTreeService {
 	private final Logger LOGGER = LoggerFactory.getLogger(getClass());
 
 	@Autowired
-	private PersonRepository personRepository;
+	private PublicRepository publicRepository;
+	
+	@Autowired
+	private FamilyRepository personRepository;
 
 	@Transactional(readOnly = true)
 	public Map<String, Object>  publicTreeD3(int limit) {
-		List<Person> persons = personRepository.persons(limit);
+		List<Person> persons = publicRepository.persons(limit);
 		return toD3ForceMap(persons);
 	}
 
@@ -49,7 +53,7 @@ public class FamilyTreeService {
 	
 	@Transactional(readOnly = true)
 	public String  publicTree(int limit) {
-		Collection<Person> persons = personRepository.persons(limit);
+		Collection<Person> persons = publicRepository.persons(limit);
 		return toJson(persons);
 	}
 	

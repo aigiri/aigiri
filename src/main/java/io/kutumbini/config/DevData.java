@@ -17,14 +17,14 @@ import org.springframework.context.annotation.Profile;
 import io.kutumbini.auth.persistence.dao.UserRepository;
 import io.kutumbini.auth.persistence.model.User;
 import io.kutumbini.domain.entity.Person;
-import io.kutumbini.repositories.PersonRepository;
+import io.kutumbini.repositories.FamilyRepository;
 
 @Configuration
 @Profile("dev")
 public class DevData {
 
 	@Autowired
-	private PersonRepository personRepository;
+	private FamilyRepository personRepository;
 
 	@Autowired
 	private UserRepository userRepository;
