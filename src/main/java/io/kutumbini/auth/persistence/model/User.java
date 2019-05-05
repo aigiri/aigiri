@@ -41,11 +41,13 @@ public class User {
 	@Relationship(type = RELATION.OWNED_BY, direction = Relationship.INCOMING)
 	private List<Person> owned = new ArrayList<>();
 	
+	// another user granted this user
 	@Relationship(type = RELATION.DELEGATE_FULL, direction = Relationship.INCOMING)
-	private List<User> delegatedFull = new ArrayList<>();
+	private List<User> delegatedInComingFull = new ArrayList<>();
 
+	// another user granted this user
 	@Relationship(type = RELATION.DELEGATE_PERIPHERAL, direction = Relationship.INCOMING)
-	private List<User> delegatedPeripheral = new ArrayList<>();
+	private List<User> delegatedInComingPeripheral = new ArrayList<>();
 
     public User() {
         super();
@@ -68,20 +70,20 @@ public class User {
 		return owned;
 	}
 
-	public void addDelagatedFull(User u) {
-		this.delegatedFull.add(u);
+	public void addDelegatedInComingFull(User u) {
+		this.delegatedInComingFull.add(u);
 	}
 	
-	public List<User> getDelegatedFull() {
-		return delegatedFull;
+	public List<User> getDelegatedInComingFull() {
+		return delegatedInComingFull;
 	}
 
-	public void addDelagatedPeripheral(User u) {
-		this.delegatedPeripheral.add(u);
+	public void addDelegatedInComingPeripheral(User u) {
+		this.delegatedInComingPeripheral.add(u);
 	}
 	
-	public List<User> getDelegatedPeripheral() {
-		return delegatedPeripheral;
+	public List<User> getDelegatedInComingPeripheral() {
+		return delegatedInComingPeripheral;
 	}
 
     public Long getId() {

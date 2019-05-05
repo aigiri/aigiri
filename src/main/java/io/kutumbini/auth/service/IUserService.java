@@ -4,6 +4,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.List;
 import java.util.Optional;
 
+import io.kutumbini.auth.persistence.model.GrantVerificationToken;
 import io.kutumbini.auth.persistence.model.PasswordResetToken;
 import io.kutumbini.auth.persistence.model.User;
 import io.kutumbini.auth.persistence.model.VerificationToken;
@@ -49,9 +50,9 @@ public interface IUserService {
     List<String> getUsersFromSessionRegistry();
 
     // for kutumbini
-    VerificationToken getGrantVerificationToken(String token);
+    GrantVerificationToken getGrantVerificationToken(String token);
 
 	// for kutumbini
-	VerificationToken createGrantVerificationToken(User user, String token, short accessLevel);
+    GrantVerificationToken createGrantVerificationToken(User user, String token, String emailTo, short accessLevel);
 
 }

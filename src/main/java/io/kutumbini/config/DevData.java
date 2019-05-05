@@ -56,15 +56,15 @@ public class DevData {
 		
 		// DELEGATED.FULL from u_amitabh
 		u_jaya.setEmail("jaya@bollywood");
-		u_jaya.addDelagatedFull(u_amitabh);
+		u_jaya.addDelegatedInComingFull(u_amitabh);
 		
 		// DELEGATED.FULL from u_jaya 
 		u_abhishek.setEmail("abhishek@bollywood");
-		u_abhishek.addDelagatedFull(u_jaya);
+		u_abhishek.addDelegatedInComingFull(u_jaya);
 		
 		// DELEGATED.PERIPHERAL from u_abhishek 
 		u_aishwarya.setEmail("aishwarya@bollywood");
-		u_aishwarya.addDelagatedPeripheral(u_abhishek);
+		u_aishwarya.addDelegatedInComingPeripheral(u_abhishek);
 		
 		u_gabbar.setEmail("gabbar@bollywood");
 		
