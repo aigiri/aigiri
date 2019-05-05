@@ -21,6 +21,7 @@ import io.kutumbini.domain.relationship.RELATION;
 import io.kutumbini.repositories.FamilyRepository;
 import io.kutumbini.repositories.PublicRepository;
 import io.kutumbini.validation.ValidationException;
+import io.kutumbini.web.data.KNode;
 
 @Service
 public class FamilyTreeService {
@@ -188,5 +189,27 @@ public class FamilyTreeService {
 		return toD3ForceMap(persons);
 	}
 	
+	public Collection<KNode> convertToKnodes(Collection<Person> persons) {
+		Map<Person, KNode> knodesMap = new HashMap<Person, KNode>();
+		for (Person p : persons) {
+			if (p.getSpouses().isEmpty()) {
+				//single
+				knodesMap.put(p, new KNode(p, null));
+			}
+			else {
+				for (Person s : p.getSpouses()) {
+					if (knodesMap.containsKey(s)) {
+						// nothing to do, p would be in knode that s belongs to
+					}
+					else {
+						KNode knode = new KNode(p, s);
+						knodesMap.put(p, knode);
+						knodesMap.put(s, knode);
+					}
+				}
+			}
+		}
 		
+		return knodesMap.values();
+	}
 }

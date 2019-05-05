@@ -27,6 +27,7 @@ import io.kutumbini.repositories.FamilyRepository;
 import io.kutumbini.repositories.PublicRepository;
 import io.kutumbini.services.FamilyTreeService;
 import io.kutumbini.validation.ValidationException;
+import io.kutumbini.web.data.KNode;
 
 // @Configuration class holding property values. In this case, for me, it worked using the @ContextConfiguration, 
 // plus the @TestPropertySource("prop-file") and @EnableConfigurationProperties(Conf.class) – acaruci Nov 7 '18 at 13:01 
@@ -109,6 +110,13 @@ public class FamilyTreeServiceTest {
 		assertTrue(json.contains("Abhishek"));
 		assertTrue(json.contains("Jaya"));
 		assertTrue(json.contains("Amitabh"));
+	}
+
+	@Test
+	public void convertToKnodes() throws Exception {
+		Collection<Person> u_amitabh_persons = familyRepository.userExtendedFamily(data.u_amitabh.getEmail(), 1000);
+		Collection<KNode> knodes = familyTreeService.convertToKnodes(u_amitabh_persons);		
+		assertEquals("u_amitabh_knodes", 2, knodes.size());
 	}
 
 	@SuppressWarnings("unchecked")
