@@ -115,7 +115,7 @@ public class FamilyTreeServiceTest {
 	@Test
 	public void convertToKnodes() throws Exception {
 		Collection<Person> u_amitabh_persons = familyRepository.userExtendedFamily(data.u_amitabh.getEmail(), 1000);
-		Collection<KNode> knodes = familyTreeService.convertToKnodes(u_amitabh_persons);		
+		Collection<KNode> knodes = familyTreeService.convertToKNodes(u_amitabh_persons);		
 		assertEquals("u_amitabh_knodes", 2, knodes.size());
 	}
 
@@ -127,6 +127,28 @@ public class FamilyTreeServiceTest {
 		persons.add(p);
 		String json = familyTreeService.toJson(persons);
 		assertTrue(json.contains(p.getFullname()));
+//		ObjectMapper mapper = new ObjectMapper();
+//		Map<String,Object> map = mapper.readValue(json, Map.class);
+//		assertTrue(containsValue(map, p.getFullname()));
+	}
+	
+	@SuppressWarnings("unchecked")
+	@Test
+	public void knodesToJson() throws Exception {
+		Optional<Person> xoptional = familyRepository.findPersons(data.u_amitabh.getEmail(), "Amitabh", "Bachchan").stream().filter(p -> p.getFirstname().equals("Amitabh")).findAny();
+		assertTrue(xoptional.isPresent());
+		Person x = xoptional.get();
+		
+		Optional<Person> yoptional = familyRepository.findPersons(data.u_jaya.getEmail(), "Jaya", "Bachchan").stream().filter(p -> p.getFirstname().equals("Jaya")).findAny();
+		assertTrue(yoptional.isPresent());
+		Person y = yoptional.get();
+		
+		KNode knode = new KNode(x, y);
+		List<KNode> knodes = new ArrayList<KNode>();
+		knodes.add(knode);
+		
+		String json = familyTreeService.knodesToJson(knodes);
+		assertTrue(json.contains(knode.getName()));
 //		ObjectMapper mapper = new ObjectMapper();
 //		Map<String,Object> map = mapper.readValue(json, Map.class);
 //		assertTrue(containsValue(map, p.getFullname()));

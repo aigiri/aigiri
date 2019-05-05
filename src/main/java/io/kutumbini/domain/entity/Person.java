@@ -45,7 +45,7 @@ public class Person {
 
 //	@JsonIgnoreProperties is for tools performing JSON serialization, to prevent infinite loop, spouse <-> spouse 
 	@JsonIgnoreProperties("spouse")
-	@Relationship(RELATION.SPOUSE)
+	@Relationship(type=RELATION.SPOUSE, direction=Relationship.UNDIRECTED)
 	private Set<Person> spouses = new HashSet<>();
 
 	public Person() {
