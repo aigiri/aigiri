@@ -82,7 +82,6 @@
 			<artifactId>jstl</artifactId>
 			<scope>runtime</scope>
 		</dependency>
-        
         <dependency>
             <groupId>javax.el</groupId>
             <artifactId>el-api</artifactId>
@@ -95,7 +94,6 @@
 			<artifactId>passay</artifactId>
 			<version>${passay.version}</version>
 		</dependency>
-
 		<dependency>
 			<groupId>com.google.guava</groupId>
 			<artifactId>guava</artifactId>
@@ -108,13 +106,11 @@
             <artifactId>uap-java</artifactId>
             <version>${uap-java.version}</version>
         </dependency>
-
         <dependency>
             <groupId>com.maxmind.geoip2</groupId>
             <artifactId>geoip2</artifactId>
             <version>${geoip2.version}</version>
         </dependency>
-
 		<dependency>
 			<groupId>net.logstash.logback</groupId>
 			<artifactId>logstash-logback-encoder</artifactId>
@@ -125,15 +121,19 @@
 			<artifactId>spring-boot-configuration-processor</artifactId>
 			<optional>true</optional>
 		</dependency>
-		
 		<dependency>
             <groupId>nz.net.ultraq.thymeleaf</groupId>
             <artifactId>thymeleaf-layout-dialect</artifactId>
         </dependency>
-
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-devtools</artifactId>
+		</dependency>
+		<dependency>
+		    <groupId>org.projectlombok</groupId>
+		    <artifactId>lombok</artifactId>
+		    <version>${lombok.version}</version>
+		    <scope>provided</scope>
 		</dependency>
 
 		<!-- test -->
@@ -181,6 +181,7 @@
         <aerogear.version>1.0.0</aerogear.version>
         <uap-java.version>1.4.0</uap-java.version>
         <geoip2.version>2.12.0</geoip2.version>
+        <lombok.version>1.18.6</lombok.version>
 	</properties>
 
 </project>
