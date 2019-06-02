@@ -28,7 +28,7 @@ public class VerificationTokenRepositoryTest {
 	private VerificationTokenRepository tokenRepository;
 
 	@Autowired
-	private TestData data;
+	private JUnitTestData data;
 
 	@Before
 	public void setUp() {

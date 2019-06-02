@@ -1,14 +1,13 @@
 package io.kutumbini.services;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,13 +15,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import io.kutumbini.auth.persistence.dao.UserRepository;
 import io.kutumbini.auth.persistence.model.User;
+import io.kutumbini.domain.entity.Family;
+import io.kutumbini.domain.entity.Gender;
 import io.kutumbini.domain.entity.Person;
-import io.kutumbini.domain.relationship.RELATION;
 import io.kutumbini.repositories.FamilyRepository;
-import io.kutumbini.repositories.PublicRepository;
 import io.kutumbini.validation.ValidationException;
-import io.kutumbini.web.data.KNode;
 
 @Service
 public class FamilyTreeService {
@@ -30,65 +29,65 @@ public class FamilyTreeService {
 	private final Logger LOGGER = LoggerFactory.getLogger(getClass());
 
 	@Autowired
-	private PublicRepository publicRepository;
+	private UserRepository userRepository;
 
 	@Autowired
-	private FamilyRepository personRepository;
+	private FamilyRepository familyRepository;
 
 	@Transactional(readOnly = true)
-	public Map<String, Object> publicTreeD3(int limit) {
-		List<Person> persons = publicRepository.persons(limit);
-		return toD3ForceMap(persons);
-	}
-
-	@Transactional(readOnly = true)
-	public String userEditableTree(User user, int limit) {
-		List<Person> persons = personRepository.userEditableFamily(user.getEmail());
-		return toJson(persons);
+	public Map<String, Object> userEditableTreeD3(User user) {
+		Set<Long> delegatorIds = getDelegatorIds(user);
+		List<Family> families = familyRepository.findByUserIdIn(delegatorIds);
+		return toD3ForceMap(families);
 	}
 
 	@Transactional(readOnly = true)
-	public String userExtendedTree(User user, int limit) {
-		List<Person> persons = personRepository.userExtendedFamily(user.getEmail(), limit);
-//		return toJson(persons);
-		return knodesToJson(convertToKNodes(persons));
+	public Map<String, Object> userExtendedTreeD3(User user) {
+		// this one does not populate relations
+		List<Family> families = familyRepository.findConnectedFamilyIds(user.getId());
+		List<Long> extendedIds = new ArrayList<Long>();
+		families.forEach(f -> extendedIds.add(f.getId()));
+		List<Family> populatedFamilies = familyRepository.findByIdIn(extendedIds);
+		return toD3ForceMap(populatedFamilies);
 	}
 
 	@Transactional(readOnly = true)
-	public String publicTree(int limit) {
-		Collection<Person> persons = publicRepository.persons(limit);
-		return toJson(persons);
+	public Map<String, Object> publicTreeD3() {
+		Iterable<Family> families = familyRepository.findAll();
+		return toD3ForceMap(families);
 	}
-
-	private Collection<Person> getRootNodes(Collection<Person> persons) {
-		Set<Person> roots = new HashSet<>();
-		persons.forEach(p -> roots.addAll(p.getRootAncestors()));
-		return roots;
-	}
-
-	private Collection<KNode> getRootKNodes(Collection<KNode> knodes) {
-		Set<Person> rootPersons = new HashSet<>();
-		knodes.forEach(knode -> {
-			rootPersons.addAll(knode.x.getRootAncestors());
-			if (knode.y != null)
-				rootPersons.addAll(knode.y.getRootAncestors());
-		});
-		// for a knode to be a root, both knode.x and knode.y have to be roots
-		return knodes.stream().filter(knode -> rootPersons.contains(knode.x) && rootPersons.contains(knode.y))
-				.collect(Collectors.toList());
-	}
-
-	private Map<String, Object> toD3ForceMap(List<Person> persons) {
+	
+	private Map<String, Object> toD3ForceMap(Iterable<Family> families) {
 		List<Map<String, Object>> nodes = new ArrayList<>();
-		persons.forEach(p -> nodes.add(map(new String[]{"name", "label"}, new Object[]{p.getFullname(), "person"})));
-
-		persons.forEach(p -> {
-		});
 		List<Map<String, Object>> rels = new ArrayList<>();
-		persons.forEach(p -> p.getParents()
-				.forEach(r -> rels.add(map(new String[]{"label", "source", "target"}, new Object[]{"parent", persons.indexOf(p), persons.indexOf(r)}))));
-		persons.forEach(p -> p.getSpouses()
-				.forEach(r -> rels.add(map(new String[]{"label", "source", "target"}, new Object[]{"spouse", persons.indexOf(p), persons.indexOf(r)}))));
+		Map<Person, Integer> piMap = new HashMap<Person, Integer>();
+		AtomicInteger index = new AtomicInteger(-1);
+		families.forEach(f -> {
+			// family node is the source
+			nodes.add(map(new String[]{"name", "label"}, new Object[]{f.getName(), "family"}));
+			int sourceIndex = index.incrementAndGet();
+			
+			// each person node is the target
+			f.getParents().forEach(p -> {
+				Integer pi = piMap.get(p);
+				if (pi == null) {
+					nodes.add(map(new String[]{"name", "label", "gender"}, new Object[]{p.getFirstname(), "person", p.getGender().name()}));
+					pi = index.incrementAndGet();
+					piMap.put(p, pi);
+				}
+				rels.add(map(new String[]{"label", "source", "target"}, new Object[]{"parent", sourceIndex, pi}));
+				});
+
+			f.getChildren().forEach(c -> {
+				Integer pi = piMap.get(c);
+				if (pi == null) {
+					nodes.add(map(new String[]{"name", "label", "gender"}, new Object[]{c.getFirstname(), "person", c.getGender().name()}));
+					pi = index.incrementAndGet();
+					piMap.put(c, pi);
+				}
+				rels.add(map(new String[]{"label", "source", "target"}, new Object[]{"child", sourceIndex, pi}));
+				});
+			});
 		
 		return map(new String[]{"nodes", "links"}, new Object[]{nodes, rels});
 	}
@@ -102,167 +101,62 @@ public class FamilyTreeService {
 		return result;
 	}
 
-	private void knodesToJson(Collection<KNode> knodes, Collection<KNode> rootKNodes, StringBuilder sb) {
-		sb.append("[");
-		boolean first = true;
-		for (KNode knode : rootKNodes) {
-			if (first) {
-				first = false;
-			} else {
-				sb.append(",");
-			}
-			sb.append("{");
-			sb.append("\"id\": ").append("\"" + knode.getIdString() + "\"");
-			sb.append(", \"name\": ").append("\"" + knode.getName() + "\"");
-			Collection<KNode> children = getChildren(knode, knodes);
-			if (!children.isEmpty()) {
-				sb.append(", \"children\": ");
-				knodesToJson(knodes, children, sb);
-			}
-			sb.append("}");
-		}
-		sb.append("]");
+	@Transactional
+	public void createFamily(User user, String husbandFirstname, String husbandLastname, String wifeFirstname, String wifeLastname) {
+		Person husband = new Person(husbandFirstname, husbandLastname, Gender.M);
+		Person wife = new Person(wifeFirstname, wifeLastname, Gender.F);
+		createFamily(husband, wife, user);
 	}
-
-	private void toJson(Collection<Person> persons, Collection<Person> rootNodes, StringBuilder sb) {
-		sb.append("[");
-		boolean first = true;
-		for (Person p : rootNodes) {
-			if (first) {
-				first = false;
-			} else {
-				sb.append(",");
-			}
-			sb.append("{");
-			sb.append("\"id\": ").append("\"" + p.getId() + "\"");
-			sb.append(", \"name\": ").append("\"" + p.getFullname() + "\"");
-			List<Person> children = getChildren(p, persons);
-			if (!children.isEmpty()) {
-				sb.append(", \"children\": ");
-				toJson(persons, children, sb);
-			}
-			sb.append("}");
-		}
-		sb.append("]");
+		
+	private void createFamily(Person husband, Person wife, User user) {
+		// the order of saving below is important!
+		Family family = new Family();
+		family.setUserId(user.getId());
+		family.addParent(wife);
+		family.addParent(husband);
+//		wife.addFamily(family);
+//		husband.addFamily(family);
+		familyRepository.save(family);
 	}
-
-	private List<Person> getChildren(Person p, Collection<Person> persons) {
-		List<Person> children = new ArrayList<>();
-		persons.forEach(r -> {
-			if (r.getParents().contains(p))
-				children.add(r);
-		});
-		return children;
-
-	}
-
-	private Set<Person> getPersons(Collection<KNode> knodes) {
-		Set<Person> persons = new HashSet<Person>();
-		knodes.forEach(knode -> {
-			persons.add(knode.x);
-			if (knode.y != null)
-				persons.add(knode.y);
-		});
-		return persons;
-	}
-
-	private Collection<KNode> getChildren(KNode knode, Collection<KNode> knodes) {
-		Set<Person> persons = getPersons(knodes);
-		List<Person> xchildren = getChildren(knode.x, persons);
-		Set<KNode> knodeChildren = convertToKNodes(xchildren);
-		if (knode.y != null) {
-			List<Person> ychildren = getChildren(knode.y, persons);
-			knodeChildren.addAll(convertToKNodes(ychildren));
-		}
-		return knodeChildren;
-	}
-
-	/**
-	 * JSON sample format: "[" + "{" + "\"name\": \"Top Level\"," + "\"children\":
-	 * [" + "{" + "\"name\": \"Level 2: A\"," + "\"children\": [" + "{" + "\"name\":
-	 * \"Son of A\"," + "}," + "{" + "\"name\": \"Daughter of A\"," + "}" + "]" +
-	 * "}," + "{" + "\"name\": \"Level 2: B\"," + "}" + "]" + "}" + "]";
-	 */
-	public String toJson(Collection<Person> persons) {
-		StringBuilder sb = new StringBuilder();
-		toJson(persons, getRootNodes(persons), sb);
-
-		// TODO ygiri make this invisible in UI
-		// add dummy top node ( UI limitation - requires a single top node )
-		String treeData = "[{ \"id\":\"-1\", \"name\": \"Dummy Top Node\", \"children\": " + sb.toString() + "}]";
-		return treeData;
-	}
-
-	public String knodesToJson(Collection<KNode> knodes) {
-		StringBuilder sb = new StringBuilder();
-		knodesToJson(knodes, getRootKNodes(knodes), sb);
-
-		// TODO ygiri make this invisible in UI
-		// add dummy top node ( UI limitation - requires a single top node )
-		String treeData = "[{ \"id\":\"-1\", \"name\": \"Dummy Top Node\", \"children\": " + sb.toString() + "}]";
-		return treeData;
-	}
-
+	
 	// TODO ygiri should be in a transaction
-	public void addPerson(User user, String firstname, String lastname, Long nodeId, String relation, Long toNodeId) {
-
-		Person person = null;
-		if (nodeId != null) {
-			Optional<Person> optional = personRepository.findById(nodeId);
-			if (optional.isPresent()) {
-				person = optional.get();
-			} else {
-				throw new ValidationException("There is no person with id " + nodeId);
-			}
+	public void addChild(User user, String firstname, String lastname, Gender gender, Long familyNodeId) {
+		Family family = null;
+		Optional<Family> optional = familyRepository.findById(familyNodeId);
+		if (optional.isPresent()) {
+			family = optional.get();
 		} else {
-			person = new Person(firstname, lastname, user);
-			person.setUser(user);
+			throw new ValidationException("There is no family with id " + familyNodeId);
 		}
 
-		// add relation
-		if (toNodeId != null) {
-			Optional<Person> related = personRepository.findById(toNodeId);
-			if (related.isPresent()) {
-				if (relation.equals(RELATION.PARENT)) {
-					person.addParent(related.get());
-				} else if (relation.equals(RELATION.SPOUSE)) {
-					person.addSpouse(related.get());
-				} else {
-					throw new ValidationException("RELATION not recognized: " + relation);
-				}
-			} else {
-				throw new ValidationException("There is no person with id " + toNodeId);
-			}
+		Person child = new Person(firstname, lastname, gender);
+		
+		if (!family.getChildren().contains(child)) {
+//			child.setBornIn(family);
+			family.addChild(child);
+			familyRepository.save(family);
+		} else {
+			throw new ValidationException("Person already exists in family with id " + familyNodeId);
 		}
-		personRepository.save(person);
+	}
+	
+	/**
+	 * 
+	 * @return IDs of the users that delegated to the passed user up to two degrees 
+	 */
+	public Set<Long> getDelegatorIds(User user) {
+		Optional<User> ouser = userRepository.findById(user.getId());
+		User u = ouser.get();
+		Set<Long> delegateIds = new HashSet<Long>();
+		// degree 0
+		delegateIds.add(u.getId());
+		// degree 1
+		u.getDelegatedInComingFull().forEach(u1 -> {
+			delegateIds.add(u1.getId());
+			// degree 2
+			u1.getDelegatedInComingFull().forEach(u2 -> delegateIds.add(u2.getId()));
+		});
+		return delegateIds;
 	}
 
-	public Map<String, Object> userExtendedTreeD3(User user, int limit) {
-		List<Person> persons = personRepository.userExtendedFamily(user.getEmail(), limit);
-		return toD3ForceMap(persons);
-	}
-
-	public Set<KNode> convertToKNodes(Collection<Person> persons) {
-		Map<Person, KNode> knodesMap = new HashMap<Person, KNode>();
-		for (Person p : persons) {
-			if (p.getSpouses().isEmpty()) {
-				// single
-				knodesMap.put(p, new KNode(p, null));
-			} else {
-				for (Person s : p.getSpouses()) {
-					if (knodesMap.containsKey(s)) {
-						// nothing to do, p would be in knode that s belongs to
-					} else {
-						KNode knode = new KNode(p, s);
-						knodesMap.put(p, knode);
-						knodesMap.put(s, knode);
-					}
-				}
-			}
-		}
-		// add to a Set so duplicate values are removed
-		Set<KNode> knodes = new HashSet<KNode>();
-		knodes.addAll(knodesMap.values());
-		return knodes;
-	}
 }

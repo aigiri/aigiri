@@ -1,9 +1,7 @@
 package io.kutumbini.auth.persistence.model;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import org.jboss.aerogear.security.otp.api.Base32;
@@ -12,7 +10,6 @@ import org.neo4j.ogm.annotation.Id;
 import org.neo4j.ogm.annotation.NodeEntity;
 import org.neo4j.ogm.annotation.Relationship;
 
-import io.kutumbini.domain.entity.Person;
 import io.kutumbini.domain.relationship.RELATION;
 
 @NodeEntity
@@ -38,16 +35,13 @@ public class User {
 
 	private Set<Role> roles;
 	
-	@Relationship(type = RELATION.OWNED_BY, direction = Relationship.INCOMING)
-	private List<Person> owned = new ArrayList<>();
-	
 	// another user granted this user
 	@Relationship(type = RELATION.DELEGATE_FULL, direction = Relationship.INCOMING)
-	private List<User> delegatedInComingFull = new ArrayList<>();
+	private Set<User> delegatedInComingFull = new HashSet<>();
 
 	// another user granted this user
 	@Relationship(type = RELATION.DELEGATE_PERIPHERAL, direction = Relationship.INCOMING)
-	private List<User> delegatedInComingPeripheral = new ArrayList<>();
+	private Set<User> delegatedInComingPeripheral = new HashSet<>();
 
     public User() {
         super();
@@ -62,19 +56,11 @@ public class User {
         roles.add(Role.ROLE_USER);
     }
 
-	public void addOwned(Person p) {
-		this.owned.add(p);
-	}
-	
-	public List<Person> getOwned() {
-		return owned;
-	}
-
 	public void addDelegatedInComingFull(User u) {
 		this.delegatedInComingFull.add(u);
 	}
 	
-	public List<User> getDelegatedInComingFull() {
+	public Set<User> getDelegatedInComingFull() {
 		return delegatedInComingFull;
 	}
 
@@ -82,7 +68,7 @@ public class User {
 		this.delegatedInComingPeripheral.add(u);
 	}
 	
-	public List<User> getDelegatedInComingPeripheral() {
+	public Set<User> getDelegatedInComingPeripheral() {
 		return delegatedInComingPeripheral;
 	}
 

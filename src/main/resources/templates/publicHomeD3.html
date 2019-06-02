@@ -8,6 +8,7 @@
 
 .link {
   stroke: #ccc;
+  stroke-width: 2.5px;
 }
 
 .node text {
@@ -32,7 +33,9 @@
 <script>
 
 	var width = 960,
-	    height = 900
+	    height = 900,
+	    color = d3.scale.category20c();
+// 	    shape = d3.scaleOrdinal(d3.symbols);
 	
 	var svg = d3.select("body").append("svg")
 	    .attr("width", width)
@@ -51,6 +54,9 @@
 	  force
 	      .nodes(json.nodes)
 	      .links(json.links)
+	      .linkDistance(function(d) { if
+  				(d.label == 'parent') { return 0; } else { return 10;}
+			})
 	      .start();
 	
 	  var link = svg.selectAll(".link")
@@ -71,10 +77,25 @@
 	//      .attr("width", 16)
 	//      .attr("height", 16);
 	
-	        node.append("circle")
-	                .attr("r", 10)
-	                .call(force.drag);
+// 	        node.append("circle")
+// 	                .attr("r", 10)
+// 	                .call(force.drag);
 	
+	        node.append("path")
+	                //.attr("d", d3.symbol().type( function(d) { return shape(d.label);} ) )
+	                .attr("d", d3.svg.symbol()
+                 		//.size(200)
+                 		.type(function(d) { if(d.label == 'family') { return "diamond"; } 
+                 				else if (d.gender == 'F') { return "circle";}
+                 				else { return "square";}
+                  			}))
+	                .style("fill", function(d) { if
+            					(d.label == 'family') { return "none"; } else { return color(d.label);}
+          					})
+//           			.attr("marker-end", function(d) { return color(d.label);
+//           					})
+	                .call(force.drag);
+	        
 	  node.append("text")
 	      .attr("dx", 12)
 	      .attr("dy", ".35em")

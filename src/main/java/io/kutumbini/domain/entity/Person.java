@@ -1,22 +1,10 @@
 package io.kutumbini.domain.entity;
 
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
 import org.neo4j.ogm.annotation.GeneratedValue;
 import org.neo4j.ogm.annotation.Id;
 import org.neo4j.ogm.annotation.NodeEntity;
-import org.neo4j.ogm.annotation.Relationship;
 import org.neo4j.ogm.annotation.Required;
-
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-
-import io.kutumbini.auth.persistence.model.User;
-import io.kutumbini.domain.relationship.RELATION;
-import io.kutumbini.validation.ValidationException;
 
 
 /**
@@ -33,84 +21,17 @@ public class Person {
 	private String firstname;
     @Required
 	private String lastname;
-
-	// outgoing relation by default
-	@Required
-	@Relationship(RELATION.OWNED_BY)
-	private User user;
-	
-	// outgoing relation by default
-	@Relationship(RELATION.PARENT)
-	private Set<Person> parents = new HashSet<>();
-
-//	@JsonIgnoreProperties is for tools performing JSON serialization, to prevent infinite loop, spouse <-> spouse 
-	@JsonIgnoreProperties("spouse")
-	@Relationship(type=RELATION.SPOUSE, direction=Relationship.UNDIRECTED)
-	private Set<Person> spouses = new HashSet<>();
+    private Gender gender;
 
 	public Person() {
 	}
 
-	public Person(String firstname, String lastname, User user) {
+	public Person(String firstname, String lastname, Gender gender) {
 		this.firstname = firstname;
 		this.lastname = lastname;
-		this.user = user;
+		this.gender = gender;
 	}
 	
-	public List<Person> getAncestors() {
-		List<Person> ancestors = new ArrayList<>();
-		ancestors.add(this);
-		parents.forEach(p -> {ancestors.addAll(p.getAncestors());});
-		return ancestors;
-	}
-	
-	public List<Person> getRootAncestors() {
-		List<Person> roots = new ArrayList<>();
-		if (parents.isEmpty()) {
-			roots.add(this);
-		}
-		else {
-			parents.forEach(p -> {roots.addAll(p.getRootAncestors());});
-		}
-		return roots;
-	}
-	
-	public User getUser() {
-		return user;
-	}
-	
-	public void setUser(User user) {
-		this.user = user;
-	}
-
-	public void addParent(Person p) {
-		// make sure 'this' is not already a parent or an ancestor of p 
-		if (p.getAncestors().contains(this)) throw new ValidationException("Cyclical parent-child relationship not allowed");
-		this.parents.add(p);
-	}
-	
-	public Set<Person> getParents() {
-		return parents;
-	}
-
-	public void addSpouse(Person spouse) {
-		if (!spouses.contains(spouse)) {
-			spouses.add(spouse);
-			spouse.addSpouse(this);
-		}
-	}
-	
-	public Set<Person> getSpouses() {
-		return spouses;
-	}
-
-	public List<Person> getRelations() {
-		List<Person> relations = new ArrayList<>();
-		relations.addAll(parents);
-		relations.addAll(spouses);
-		return relations;
-	}
-
 	public Long getId() {
 		return id;
 	}
@@ -127,6 +48,14 @@ public class Person {
 		return firstname + " " + lastname;
 	}
 
+	public Gender getGender() {
+		return gender;
+	}
+	
+	public void setGender(Gender gender) {
+		this.gender = gender;
+	}
+	
 	@Override
 	public boolean equals(Object obj) {
 		if (this.id != null) {

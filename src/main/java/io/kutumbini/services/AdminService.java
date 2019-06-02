@@ -15,7 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 import io.kutumbini.auth.persistence.dao.UserRepository;
 import io.kutumbini.auth.persistence.model.Role;
 import io.kutumbini.auth.persistence.model.User;
-import io.kutumbini.repositories.FamilyRepository;
+import io.kutumbini.repositories.PersonRepository;
 
 @Service
 public class AdminService {
@@ -26,7 +26,7 @@ public class AdminService {
 	private UserRepository userRepository;
 
 	@Autowired
-	private FamilyRepository personRepository;
+	private PersonRepository personRepository;
 
 	
 	@Transactional

@@ -22,7 +22,6 @@ import io.kutumbini.auth.persistence.dao.GrantVerificationTokenRepository;
 import io.kutumbini.auth.persistence.dao.UserRepository;
 import io.kutumbini.auth.persistence.model.GrantVerificationToken;
 import io.kutumbini.auth.persistence.model.User;
-import io.kutumbini.auth.persistence.model.VerificationToken;
 import io.kutumbini.auth.service.IUserService;
 import io.kutumbini.auth.web.util.GenericResponse;
 

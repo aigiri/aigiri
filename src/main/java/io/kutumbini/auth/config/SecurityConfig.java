@@ -13,6 +13,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.core.session.SessionRegistry;
 import org.springframework.security.core.session.SessionRegistryImpl;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
@@ -23,7 +24,6 @@ import org.springframework.security.web.authentication.rememberme.InMemoryTokenR
 
 import io.kutumbini.auth.persistence.model.Role;
 import io.kutumbini.auth.security.ActiveUserStore;
-import io.kutumbini.auth.security.CustomUserDetailsService;
 import io.kutumbini.auth.security.CustomRememberMeServices;
 import io.kutumbini.auth.security.google2fa.CustomAuthenticationProvider;
 import io.kutumbini.auth.security.google2fa.CustomWebAuthenticationDetailsSource;
@@ -34,7 +34,7 @@ import io.kutumbini.auth.security.google2fa.CustomWebAuthenticationDetailsSource
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Autowired
-    private CustomUserDetailsService userDetailsService;
+    private UserDetailsService userDetailsService;
 
     @Autowired
     private AuthenticationSuccessHandler myAuthenticationSuccessHandler;

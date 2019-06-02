@@ -4,26 +4,33 @@ import java.util.List;
 
 import org.springframework.data.neo4j.annotation.Query;
 import org.springframework.data.neo4j.repository.Neo4jRepository;
-import org.springframework.data.rest.core.annotation.RepositoryRestResource;
 
-import io.kutumbini.domain.entity.Person;
+import io.kutumbini.domain.entity.Family;
 
-@RepositoryRestResource()
-public interface FamilyRepository extends Neo4jRepository<Person, Long> {
+//@RepositoryRestResource()
+public interface FamilyRepository extends Neo4jRepository<Family, Long> {
 	
-	// TODO ygiri make sure delegation results are based on the direction of the DELEGATE relation
-    // persons owned by the user or delegated to them by another user
-//    @Query("MATCH (p:Person)--(:User {email: {0}})  OPTIONAL MATCH (q:Person)--(:User)-[*1..2]->(:User {email: {0}}) RETURN p,q")
-//    @Query("MATCH (:Person)-[r*0..1]-(p:Person)--(:User)-[*0..2]->(:User {email: {0}}) RETURN p,r")
-    @Query("MATCH (p:Person)--(:User)-[*0..2]->(:User {email: {0}}) RETURN p")
-	List<Person> userEditableFamily(String userEmail);
+//	@Depth(3)
+	List<Family> findByUserId(long userId);
+	
+//	@Query("MATCH (f:Family)-[r]-(:Person) RETURN f,r,p") // without the @Query this runs into OOM Exception
+    Iterable<Family> findAll();
+	
+//	@Query("MATCH (:Person)<-[:PARENT]-(f:Family)-[:PARENT]->(:Person)--(:User)-[*0..2]->(:User {email: {0}}) RETURN f")
+//	@Query("MATCH (:User {email: {0}})<-[*0..2]-(:User)--(f:Family)--(p:Person) RETURN f,p")
+	List<Family> findByUserIdIn(Iterable<Long> userIds);
 
-    // persons owned by the user and their relations
-    @Query("MATCH (:User {email: {0}})--(p:Person)-[r*]-(q:Person) RETURN p,q,r LIMIT {1}")
-//    @Query("MATCH (:User {email: {0}})--(:Person)-[*]-(p:Person) RETURN p LIMIT {1}")
-	List<Person> userExtendedFamily(String userEmail, int limit);
-    
-    @Query("MATCH (p:Person {firstname: {1}, lastname: {2}})--(:User)-[*0..2]->(:User {email: {0}}) RETURN p")
-    List<Person> findPersons(String userEmail, String firstname, String lastname);
-    
+	List<Family> findByIdIn(Iterable<Long> idsList);
+
+	//	@Query("MATCH (:Person)<-[:PARENT]-(f:Family)-[:PARENT]->(:Person)--(:User)-[*0..2]->(:User {email: {0}}) RETURN f")
+//	@Query("MATCH (f:Family {userId: {0}}) "
+//			+ "UNION MATCH (f:Family {userId: {0}}), (f)-[*]-(g:Family) "
+//			+ "RETURN f.id")
+	@Query("MATCH (f:Family {userId: {0}})-[*]-(g:Family) RETURN f,g")
+	List<Family> findConnectedFamilyIds(long userId);
+
+	@Query("MATCH (f:Family)-[:PARENT]-(:Person {firstname: {1}, lastname: {2}}), (f:Family)-[:PARENT]-(:Person {firstname: {3}, lastname: {4}})"
+			+ " WHERE f.userId = {0} RETURN f")
+	List<Family> find(long userId, String husbandFirstname, String husbandLastname, String wifeFirstname, String wifeLastname);
+
 }

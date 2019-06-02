@@ -1,18 +1,7 @@
-package io.kutumbini.config;
+package io.kutumbini.test;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-
-import javax.annotation.PostConstruct;
-
-import org.neo4j.graphdb.GraphDatabaseService;
-import org.neo4j.graphdb.factory.GraphDatabaseFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Profile;
+import org.springframework.stereotype.Component;
 
 import io.kutumbini.auth.persistence.dao.UserRepository;
 import io.kutumbini.auth.persistence.model.User;
@@ -21,37 +10,22 @@ import io.kutumbini.domain.entity.Gender;
 import io.kutumbini.domain.entity.Person;
 import io.kutumbini.repositories.FamilyRepository;
 
-@Configuration
-@Profile("dev")
-public class DevData {
-
+@Component
+public class JUnitTestData {
+	
 	@Autowired
 	private UserRepository userRepository;
 
 	@Autowired
 	private FamilyRepository familyRepository;
 
-//	@PostConstruct
-	private void loadData() throws IOException {
-		Path path = Paths.get("src/test/resources/test.cypher");
-//	    String cypher = Files.readString(path);
-		String cypher = new String(Files.readAllBytes(path));
-	    
-	    // Make sure this db instance is the same as the one loaded elsewhere, e.g., by PersonRepository
-	    GraphDatabaseFactory graphDbFactory = new GraphDatabaseFactory();
-	    GraphDatabaseService graphDb = graphDbFactory.newEmbeddedDatabase(new File("data/devgraph.db"));
-	    graphDb.execute(cypher);
-	}
+	public User u_amitabh = null;
+	public User u_jaya = null;
+	public User u_abhishek = null;
+	public User u_aishwarya = null;
+	public User u_homer = null;
 
-//	@PostConstruct
-	private void setup() {
-		
-		User u_amitabh = new User();
-		User u_jaya = new User();
-		User u_abhishek = new User();
-		User u_aishwarya = new User();
-		User u_homer = new User();
-
+	public void setup() {
 		//**************************************************** set up users
 		// no delegated nodes
 		u_amitabh = new User();
@@ -137,4 +111,5 @@ public class DevData {
 		familyRepository.save(f3);
 		familyRepository.save(simpsons);
 	}
+
 }

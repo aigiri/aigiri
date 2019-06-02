@@ -8,10 +8,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import io.kutumbini.auth.persistence.model.User;
+import io.kutumbini.domain.entity.Gender;
 import io.kutumbini.services.FamilyTreeService;
 
 // TODO ygiri add input validation and show appropriate error responses to user
@@ -22,31 +22,28 @@ public class FamilyTreeController {
 	@Autowired
 	private FamilyTreeService familyTreeService;
 
-	@GetMapping("/editTree")
-	public String editTree(String firstname, String lastname, Long nodeId, String relation, Long toNodeId) {
+	@GetMapping("/createFamily")
+	public String createFamily(String husbandFirstname, String husbandLastname, String wifeFirstname, String wifeLastname) {
 		User user = getUser();
-		familyTreeService.addPerson(user, firstname, lastname, nodeId, relation, toNodeId);
-		return familyTreeService.userEditableTree(user, 1000);
+		familyTreeService.createFamily(user, husbandFirstname, husbandLastname, wifeFirstname, wifeLastname);
+		return "";
 	}
 
-	@GetMapping("/userHomeTree")
-	public String userHomeTree(@RequestParam(value = "limit", required = false) Integer limit) {
-		return familyTreeService.userExtendedTree(getUser(), limit == null ? 1000 : limit);
+	@GetMapping("/addChild")
+	public String addChild(String firstname, String lastname, String gender, Long familyNodeId) {
+		User user = getUser();	
+		familyTreeService.addChild(user, firstname, lastname, Gender.valueOf(gender), familyNodeId);
+		return "";
 	}
 
 	@GetMapping("/userHomeD3Tree")
-	public Map<String, Object> userHomeD3Tree(@RequestParam(value = "limit", required = false) Integer limit) {
-		return familyTreeService.userExtendedTreeD3(getUser(), limit == null ? 1000 : limit);
-	}
-
-	@GetMapping("/publicHomeTree")
-	public String publicHomeTree(@RequestParam(value = "limit", required = false) Integer limit) {
-		return familyTreeService.publicTree(limit == null ? 1000 : limit);
+	public Map<String, Object> userHomeD3Tree() {
+		return familyTreeService.userEditableTreeD3(getUser());
 	}
 
 	@GetMapping("/publicHomeD3Tree")
-	public Map<String, Object> publicHomeD3Tree(@RequestParam(value = "limit", required = false) Integer limit) {
-		return familyTreeService.publicTreeD3(limit == null ? 1000 : limit);
+	public Map<String, Object> publicHomeD3Tree() {
+		return familyTreeService.publicTreeD3();
 	}
 	
 	private User getUser() {
