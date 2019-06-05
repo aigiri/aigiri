@@ -39,10 +39,13 @@ public class MvcConfig implements WebMvcConfigurer {
     @Override
     public void addViewControllers(final ViewControllerRegistry registry) {
         registry.addViewController("/").setViewName("forward:/login");
-        registry.addViewController("/userHome");
-        registry.addViewController("/userHomeD3");
-        registry.addViewController("/publicHome");
-        registry.addViewController("/publicHomeD3");
+        registry.addViewController("/sample-popupInfo.html");
+        registry.addViewController("/sample-zoom-pan.html");
+        registry.addViewController("/sample-addNode.html");
+        registry.addViewController("/sample-link-arrow.html");
+        registry.addViewController("/viewFamily");
+        registry.addViewController("/editFamily");
+        registry.addViewController("/viewExtendedFamily");
         registry.addViewController("/login");
         registry.addViewController("/loginRememberMe");
         registry.addViewController("/customLogin");

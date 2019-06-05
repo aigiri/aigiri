@@ -29,6 +29,13 @@ public class FamilyTreeController {
 		return "";
 	}
 
+	@GetMapping("/addChildById")
+	public String addChildById(Long childNodeId, Long familyNodeId) {
+		User user = getUser();	
+		familyTreeService.addChild(childNodeId, familyNodeId);
+		return "";
+	}
+
 	@GetMapping("/addChild")
 	public String addChild(String firstname, String lastname, String gender, Long familyNodeId) {
 		User user = getUser();	
@@ -36,15 +43,21 @@ public class FamilyTreeController {
 		return "";
 	}
 
-	@GetMapping("/userHomeD3Tree")
-	public Map<String, Object> userHomeD3Tree() {
-		return familyTreeService.userEditableTreeD3(getUser());
+	@GetMapping("/editFamily")
+	public Map<String, Object> editFamilyData() {
+		return familyTreeService.editFamilyData(getUser());
 	}
 
-	@GetMapping("/publicHomeD3Tree")
-	public Map<String, Object> publicHomeD3Tree() {
-		return familyTreeService.publicTreeD3();
+	@GetMapping("/viewFamilyData")
+	public Map<String, Object> viewFamilyData() {
+		return familyTreeService.viewExtendedFamilyData(getUser());
 	}
+
+	@GetMapping("/viewExtendedFamilyData")
+	public Map<String, Object> viewFamilyExtendedData() {
+		return familyTreeService.viewExtendedFamilyData(getUser());
+	}
+
 	
 	private User getUser() {
 		AbstractAuthenticationToken auth = (AbstractAuthenticationToken) SecurityContextHolder.getContext()

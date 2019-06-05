@@ -92,7 +92,7 @@ public class CustomAuthenticationSuccessHandler implements AuthenticationSuccess
             }
         }
         if (isUser) {
-            return "/userHome";
+            return "/viewFamily";
         } else if (isAdmin) {
             return "/console.html";
         } else {

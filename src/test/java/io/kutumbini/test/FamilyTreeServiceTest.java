@@ -72,13 +72,13 @@ public class FamilyTreeServiceTest {
 		Map<String, Object> map = familyTreeService.publicTreeD3();
 		Collection nodes = (Collection) map.get("nodes");
 		Collection links = (Collection) map.get("links");
-		assertEquals("number of nodes", 16, nodes.size());
-		assertEquals("number of links", 14, links.size());
+		assertEquals("number of nodes", 19, nodes.size());
+		assertEquals("number of links", 17, links.size());
 	}
 	
 	@Test
 	public void userEditableTreeD3() {
-		Map<String, Object> map = familyTreeService.userEditableTreeD3(data.u_abhishek);
+		Map<String, Object> map = familyTreeService.viewExtendedFamilyData(data.u_abhishek);
 		Collection nodes = (Collection) map.get("nodes");
 		Collection links = (Collection) map.get("links");
 		assertEquals("number of nodes", 10, nodes.size());
@@ -86,8 +86,8 @@ public class FamilyTreeServiceTest {
 	}
 
 	@Test
-	public void userExtendedTreeD3() {
-		Map<String, Object> map = familyTreeService.userExtendedTreeD3(data.u_abhishek);
+	public void userExtendedFamilyData() {
+		Map<String, Object> map = familyTreeService.viewExtendedFamilyData(data.u_abhishek);
 		Collection nodes = (Collection) map.get("nodes");
 		Collection links = (Collection) map.get("links");
 		assertEquals("number of nodes", 13, nodes.size());
@@ -95,7 +95,7 @@ public class FamilyTreeServiceTest {
 	}
 
 	@Test
-	public void userEditableTreeD3a() {
+	public void userExtendedFamilyData2() {
 		User user = new User();
 		user.setEmail("ramakrishna@ntr");
 		userRepository.save(user);
@@ -104,7 +104,7 @@ public class FamilyTreeServiceTest {
 		String wifeFirstname = "Basavatarakam";
 		String wifeLastname = "Nandamuri";
 		familyTreeService.createFamily(user, husbandFirstname, husbandLastname, wifeFirstname, wifeLastname);
-		Map<String, Object> map = familyTreeService.userExtendedTreeD3(user);
+		Map<String, Object> map = familyTreeService.viewExtendedFamilyData(user);
 		Collection nodes = (Collection) map.get("nodes");
 		Collection links = (Collection) map.get("links");
 		assertEquals("number of nodes", 3, nodes.size());
@@ -152,6 +152,12 @@ public class FamilyTreeServiceTest {
 	
 	@Test
 	public void findConnectedFamilyIds() {
+		List<Family> ids = familyRepository.findConnectedFamilyIds(data.u_homer.getId());
+		assertEquals(1, ids.size());
+	}
+	
+	@Test
+	public void findConnectedFamilyIds1() {
 		List<Family> ids = familyRepository.findConnectedFamilyIds(data.u_abhishek.getId());
 		assertEquals(4, ids.size());
 	}
