@@ -1,9 +1,10 @@
 # Search for TODO ygiri across the code base to find places where some of these can be implemented
 UI
 	- Put on phone
-	- Drag & Drop Edit Tree Page!
 	- Cool View tree / graph pages
-	- Great Home Page
+	- Great Home Page!
+	- Many changes needed on the Edit Tree Page ( see the TODO list in editFamily.html )
+	- Download feature: Download the user owned tree and view ( even edit? ) offline
 	- Short video of site description
 	- Legal -- Kutumbini not liable -- user acceptance required
 	- FAQ

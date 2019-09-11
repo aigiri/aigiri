@@ -1,6 +1,8 @@
 package io.kutumbini.web.model;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -193,6 +195,34 @@ public class EditDataProcessor {
 		});
 
 		return spouseIds;
+	}
+
+	public static List<Map<String, Object>> getEditFamilyData(List<Person> persons, List<Family> families) {
+		List<Map<String, Object>> data = new ArrayList<Map<String, Object>>();
+		persons.forEach(person -> {
+			Map<String, Object> map = new HashMap<String, Object>();
+			Set<Long> spouses = new HashSet<Long>();
+
+			map.put("person", person);
+
+			StringBuilder spouseIds = new StringBuilder();
+			families.stream().filter(f -> f.getParents().contains(person)).forEach(f -> {
+				f.getParents().forEach(parent -> {
+					if (!parent.equals(person)) spouseIds.append("," + parent.getId());
+				});
+			});
+			map.put("spouses", spouseIds.toString().replaceFirst(",", ""));
+
+			StringBuilder parentIds = new StringBuilder();
+			families.stream().filter(f -> f.getChildren().contains(person)).forEach(f -> {
+				f.getParents().forEach(parent -> parentIds.append("," + parent.getId()));
+			});
+			map.put("parents", parentIds.toString().replaceFirst(",", ""));
+
+			data.add(map);
+		});
+
+		return data;
 	}
 
 }

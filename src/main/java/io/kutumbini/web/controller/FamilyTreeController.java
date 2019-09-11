@@ -57,9 +57,6 @@ public class FamilyTreeController {
 		return "success";
 	}
 
-//		ObjectMapper mapper = new ObjectMapper();
-//		String familyTableJSON = mapper.writeValueAsString(personMap);
-
 	/**
 	 * Sets the data in the session and resyncs on /saveFamilyData call
 	 */
@@ -74,36 +71,8 @@ public class FamilyTreeController {
 		List<Family> families = familyTreeService.getEditableFamlies(getUser());
 		session.setAttribute(Constants.PERSONS, persons);
 		session.setAttribute(Constants.FAMILIES, families);
-		List<Map<String, Object>> data = getEditFamilyData(persons, families);
+		List<Map<String, Object>> data = EditDataProcessor.getEditFamilyData(persons, families);
 		session.setAttribute(Constants.EDIT_TABLE_DATA, data);
-	}
-
-	private List<Map<String, Object>> getEditFamilyData(List<Person> persons, List<Family> families) {
-		List<Map<String, Object>> data = new ArrayList<Map<String, Object>>();
-		persons.forEach(person -> {
-			Map<String, Object> map = new HashMap<String, Object>();
-			Set<Long> spouses = new HashSet<Long>();
-
-			map.put("person", person);
-
-			StringBuilder spouseIds = new StringBuilder();
-			families.stream().filter(f -> f.getParents().contains(person)).forEach(f -> {
-				f.getParents().forEach(parent -> {
-					if (!parent.equals(person)) spouseIds.append("," + parent.getId());
-				});
-			});
-			map.put("spouses", spouseIds.toString().replaceFirst(",", ""));
-
-			StringBuilder parentIds = new StringBuilder();
-			families.stream().filter(f -> f.getChildren().contains(person)).forEach(f -> {
-				f.getParents().forEach(parent -> parentIds.append("," + parent.getId()));
-			});
-			map.put("parents", parentIds.toString().replaceFirst(",", ""));
-
-			data.add(map);
-		});
-
-		return data;
 	}
 
 	/**
@@ -119,9 +88,10 @@ public class FamilyTreeController {
 		Set<Family> removeFamilies = new HashSet<Family>();
 		EditDataProcessor.updateSessionData(edited, session, getUser(), addFamilies, removeFamilies);
 
-		// remove families that may have become invalid after after complex updates
 		List<Person> persons = (List<Person>) session.getAttribute(Constants.PERSONS);
 		List<Family> families = (List<Family>) session.getAttribute(Constants.FAMILIES);
+		
+		// remove families that may have become invalid after after complex updates
 		families.forEach(f -> {
 			if (!f.isValid())
 				removeFamilies.add(f);
