@@ -100,13 +100,13 @@
         					(d.label == 'family') { return 10000; } else { return 100;}
       					})
                  		.type(function(d) { if(d.label == 'family') { return "circle"; } 
-                 				else if (d.gender == 'F') { return "diamond";}
+                 				else if (d.gender == 'Female') { return "diamond";}
                  				else { return "square";}
                   			}))
 	                .style("stroke", function(d) { return color(d.familyid);
           					})
 	                .style("fill", function(d) { if
-            					(d.label == 'family') { return "none"; } else if (d.gender == 'F') { return "pink";}
+            					(d.label == 'family') { return "none"; } else if (d.gender == 'Female') { return "pink";}
                  				else { return "gray";}
           					})
 // 	                .style("fill", function(d) {return color(d.label);

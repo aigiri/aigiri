@@ -27,6 +27,7 @@ import io.kutumbini.domain.entity.Person;
 import io.kutumbini.services.FamilyTreeService;
 import io.kutumbini.web.model.Constants;
 import io.kutumbini.web.model.EditDataProcessor;
+import io.kutumbini.web.model.FamilyCouncelor;
 
 // TODO ygiri add input validation and show appropriate error responses to user
 @RestController
@@ -83,26 +84,10 @@ public class FamilyTreeController {
 	public String saveFamilyData(@RequestBody String familyData, HttpSession session) throws Exception {
 		ObjectMapper mapper = new ObjectMapper();
 		List<Map<String, Object>> edited = mapper.readValue(familyData, List.class);
-
-		Set<Family> addFamilies = new HashSet<Family>();
-		Set<Family> removeFamilies = new HashSet<Family>();
-		EditDataProcessor.updateSessionData(edited, session, getUser(), addFamilies, removeFamilies);
-
-		List<Person> persons = (List<Person>) session.getAttribute(Constants.PERSONS);
-		List<Family> families = (List<Family>) session.getAttribute(Constants.FAMILIES);
-		
-		// remove families that may have become invalid after after complex updates
-		families.forEach(f -> {
-			if (!f.isValid())
-				removeFamilies.add(f);
-		});
-
-		removeFamilies.forEach(f -> familyTreeService.deleteFamily(f.getId(), getUser()));
-		addFamilies.forEach(f -> familyTreeService.saveFamily(f));
-
-		familyTreeService.savePersons(persons);
-		familyTreeService.saveFamilies(families);
-
+		FamilyCouncelor familyCouncelor = new FamilyCouncelor(session, getUser(), familyTreeService);
+		EditDataProcessor editDataProcessor = new EditDataProcessor(familyCouncelor);
+		editDataProcessor.updateSessionData(edited, getUser());
+		familyCouncelor.saveToRepository();
 		setFamilyDataInSession(session);
 		return "success";
 	}

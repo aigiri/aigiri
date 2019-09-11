@@ -4,14 +4,13 @@
 	Make this and other pages outstanding in appearance and usability! 
 	After ajax save, refresh the page so the table reflects the saved data on the server
 	Make table rows / cells or other fields non editable as appropriate
+	Must be able to tab through table cells
 	Allow entry / display of multiple spouses in the form 
 	Add spinner while ajax calls run
 	Add button next to the person row in the UI table to bring up a layover to gather additional person information,
 		photo, birth date, notes, etc.
-	If gender is not M/F the parent id will not be displayed in the UI
-		Change the UI to combine Mother/Father into one 'Parents' column that will have both IDs
-		Use a multi-select upto two parents
-	Use multi-select for the Spouses column
+	Use a multi-select to allow selection of up to two parents
+	Use multi-select for the Spouses selection
 	Use a dropdown for gender
 	
 	Note on UI limitation because of spousal symmetry:
@@ -80,7 +79,7 @@ Add a new person by clicking on the '+' button. Add spouses and parents by enter
 			</table>
         <br>
         <button onclick="saveFamily()">Save</button> &nbsp; &nbsp; &nbsp;
-        <button onclick="deleteAll()">Delete All</button>
+        <button onclick="if(window.confirm('Are you sure you want to delete all?')) deleteAll()">Delete All</button>
 	</div>
  	           	
 <script>
@@ -153,7 +152,7 @@ function deleteRow(o) {
 			cache: false,
 			timeout: 100000,
 			success: function (data) {
-				console.log("SUCCESS : ", data);
+				window.location.reload();
 			},
 			error: function (e) {
 				console.log("ERROR : ", e);
@@ -195,7 +194,7 @@ function deleteRow(o) {
 			cache: false,
 			timeout: 100000,
 			success: function (data) {
-				console.log("SUCCESS : ", data);
+				window.location.reload();
 			},
 			error: function (e) {
 				console.log("ERROR : ", e);

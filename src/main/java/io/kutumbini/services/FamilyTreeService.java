@@ -25,6 +25,7 @@ import io.kutumbini.repositories.FamilyRepository;
 import io.kutumbini.repositories.PersonRepository;
 import io.kutumbini.validation.ValidationException;
 
+// TODO ygiri make sure all passed entities for saving to and all fetches from the repositories are user owned / permitted
 @Service
 public class FamilyTreeService {
 
