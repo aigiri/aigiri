@@ -10,6 +10,15 @@ import io.kutumbini.domain.entity.Person;
 //@RepositoryRestResource()
 public interface PersonRepository extends Neo4jRepository<Person, Long> {
 	
+	List<Person> findAll();
+	
+	List<Person> findByUserIdIn(Iterable<Long> delegatorIds);
+
+	Iterable<Long> deleteByUserIdIn(Iterable<Long> id);
+	
+	@Query("MATCH (p:Person {id: {0}, userId: {1}}) DETACH DELETE p")
+	void delete(Long id, Long userId);
+	
 	// TODO ygiri make sure delegation results are based on the direction of the DELEGATE relation
     // persons owned by the user or delegated to them by another user
 //    @Query("MATCH (p:Person)--(:User {email: {0}})  OPTIONAL MATCH (q:Person)--(:User)-[*1..2]->(:User {email: {0}}) RETURN p,q")

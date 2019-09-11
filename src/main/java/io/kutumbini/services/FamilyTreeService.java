@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,219 +40,237 @@ public class FamilyTreeService {
 	private FamilyRepository familyRepository;
 
 	@Transactional
-	public Map<String, Object> editFamilyData(User user) {
+	public List<Person> getEditablePersons(User user) {
 		Set<Long> delegatorIds = getDelegatorIds(user);
-		List<Family> families = familyRepository.findByUserIdIn(delegatorIds);
-		return toD3ForceEditMap(families);
+		return personRepository.findByUserIdIn(delegatorIds);
+	}
+
+	@Transactional
+	public List<Family> getEditableFamlies(User user) {
+		Set<Long> delegatorIds = getDelegatorIds(user);
+		return familyRepository.findByUserIdIn(delegatorIds);
 	}
 
 	@Transactional(readOnly = true)
 	public Map<String, Object> viewExtendedFamilyData(User user) {
 		Set<Long> delegatorIds = getDelegatorIds(user);
-//		List<Family> families = familyRepository.findByUserIdIn(delegatorIds);
-		Iterable<Family> families = familyRepository.findAll();
-		return toD3ForceViewMap(families);
+		List<Family> families = familyRepository.findByUserIdIn(delegatorIds);
+		List<Person> persons = personRepository.findByUserIdIn(delegatorIds);
+		return toD3ForceViewMap(families, persons);
 	}
 
 	@Transactional(readOnly = true)
 	public Map<String, Object> publicTreeD3() {
-		Iterable<Family> families = familyRepository.findAll();
-		return toD3ForceViewMap(families);
-	}
-	
-	private Map<String, Object> toD3ForceEditMap(Iterable<Family> families) {
-		List<Map<String, Object>> nodes = new ArrayList<>();
-		List<Map<String, Object>> rels = new ArrayList<>();
-		Map<Person, Integer> piMap = new HashMap<Person, Integer>();
-		AtomicInteger index = new AtomicInteger(-1);
-		families.forEach(f -> {			
-			// each person node is the target
-			f.getParents().forEach(p -> {
-				Integer pi = piMap.get(p);
-				if (pi == null) {
-					nodes.add(map(new String[]{"firstname", "lastname", "gender"}, 
-							new Object[]{p.getFirstname(), p.getLastname(), p.getGender().name()}));
-					pi = index.incrementAndGet();
-					piMap.put(p, pi);
-				}
-				
-				final Integer fpi = pi;
-
-				f.getChildren().forEach(c -> {
-					Integer ci = piMap.get(c);
-					if (ci == null) {
-						nodes.add(map(new String[]{"firstname", "lastname", "gender"}, 
-								new Object[]{c.getFirstname(), c.getLastname(), c.getGender().name()}));
-						ci = index.incrementAndGet();
-						piMap.put(c, ci);
-					}
-					rels.add(map(new String[]{"source", "target"}, new Object[]{ci, fpi}));
-					});
-			});
-		});
-		return map(new String[]{"nodes", "links"}, new Object[]{nodes, rels});
+		List<Family> families = familyRepository.findAll();
+		List<Person> persons = personRepository.findAll();
+		return toD3ForceViewMap(families, persons);
 	}
 
-	private Map<String, Object> toD3ForceViewMap(Iterable<Family> families) {
+	private Map<String, Object> toD3ForceViewMap(List<Family> families, List<Person> persons) {
+		List<Person> orphans = persons.stream().filter(p -> !families.stream().anyMatch(f -> f.isMember(p)))
+				.collect(Collectors.toList());
 		List<Map<String, Object>> nodes = new ArrayList<>();
 		List<Map<String, Object>> rels = new ArrayList<>();
 		Map<Person, Integer> piMap = new HashMap<Person, Integer>();
 		AtomicInteger index = new AtomicInteger(-1);
 		families.forEach(f -> {
 			// family node is the source
-			nodes.add(map(new String[]{"name", "label"}, new Object[]{f.getName(), "family"}));
+			nodes.add(map(new String[] { "name", "label" }, new Object[] { f.getName(), "family" }));
 			int sourceIndex = index.incrementAndGet();
-			
+
 			// each person node is the target
 			f.getParents().forEach(p -> {
 				Integer pi = piMap.get(p);
 				if (pi == null) {
-					nodes.add(map(new String[]{"name", "label", "gender"}, 
-							new Object[]{p.getFirstname(), "person", p.getGender().name()}));
+					nodes.add(map(new String[] { "name", "label", "gender" },
+							new Object[] { p.getFirstname(), "person", p.getGender().name() }));
 					pi = index.incrementAndGet();
 					piMap.put(p, pi);
 				}
-				rels.add(map(new String[]{"familyid", "label", "source", "target"}, new Object[]{f.getId(), "parent", sourceIndex, pi}));
-				});
+				rels.add(map(new String[] { "familyid", "label", "source", "target" },
+						new Object[] { f.getId(), "parent", sourceIndex, pi }));
+			});
 
 			f.getChildren().forEach(c -> {
 				Integer pi = piMap.get(c);
 				if (pi == null) {
-					nodes.add(map(new String[]{"name", "label", "gender"}, 
-							new Object[]{c.getFirstname(), "person", c.getGender().name()}));
+					nodes.add(map(new String[] { "name", "label", "gender" },
+							new Object[] { c.getFirstname(), "person", c.getGender().name() }));
 					pi = index.incrementAndGet();
 					piMap.put(c, pi);
 				}
-				rels.add(map(new String[]{"familyid", "label", "source", "target"}, new Object[]{f.getId(), "child", sourceIndex, pi}));
-				});
+				rels.add(map(new String[] { "familyid", "label", "source", "target" },
+						new Object[] { f.getId(), "child", sourceIndex, pi }));
 			});
-		
-		return map(new String[]{"nodes", "links"}, new Object[]{nodes, rels});
+		});
+
+		orphans.forEach(o -> {
+			nodes.add(map(new String[] { "name", "label", "gender" },
+					new Object[] { o.getFirstname(), "person", o.getGender().name() }));
+		});
+
+		return map(new String[] { "nodes", "links" }, new Object[] { nodes, rels });
 	}
 
 	private Map<String, Object> toD3ForceView2Map(Iterable<Family> families) {
 		List<Map<String, Object>> nodes = new ArrayList<>();
 		List<Map<String, Object>> rels = new ArrayList<>();
 		Map<Person, Integer> piMap = new HashMap<Person, Integer>();
-		
+
 		AtomicInteger index = new AtomicInteger(-1);
 		// to determine singles iterate through all families and gather parents
 		// the remaining ones would be singles
 		families.forEach(f -> f.getParents().forEach(p -> {
-										Integer pi = index.incrementAndGet();
-										piMap.put(p, pi);
-										nodes.add(map(new String[]{"name", "label", "gender", "single"}, 
-												new Object[]{p.getFirstname(), "person", p.getGender().name(), "false"}));
-									}));
-		
+			Integer pi = index.incrementAndGet();
+			piMap.put(p, pi);
+			nodes.add(map(new String[] { "name", "label", "gender", "single" },
+					new Object[] { p.getFirstname(), "person", p.getGender().name(), "false" }));
+		}));
+
 		families.forEach(f -> {
 			// family node is the source
-			nodes.add(map(new String[]{"name", "label"}, new Object[]{f.getName(), "family"}));
+			nodes.add(map(new String[] { "name", "label" }, new Object[] { f.getName(), "family" }));
 			int sourceIndex = index.incrementAndGet();
-			
+
 			// each person node is the target
 			f.getParents().forEach(p -> {
 				Integer pi = piMap.get(p);
-				rels.add(map(new String[]{"familyid", "label", "source", "target"}, new Object[]{f.getId(), "parent", sourceIndex, pi}));
-				});
+				rels.add(map(new String[] { "familyid", "label", "source", "target" },
+						new Object[] { f.getId(), "parent", sourceIndex, pi }));
+			});
 
 			f.getChildren().forEach(c -> {
 				Integer pi = piMap.get(c);
 				if (pi == null) {
-					nodes.add(map(new String[]{"name", "label", "gender", "single"}, 
-							new Object[]{c.getFirstname(), "person", c.getGender().name(), "true"}));
+					nodes.add(map(new String[] { "name", "label", "gender", "single" },
+							new Object[] { c.getFirstname(), "person", c.getGender().name(), "true" }));
 					pi = index.incrementAndGet();
 					piMap.put(c, pi);
 				}
-				rels.add(map(new String[]{"familyid", "label", "source", "target"}, new Object[]{f.getId(), "child", sourceIndex, pi}));
-				});
+				rels.add(map(new String[] { "familyid", "label", "source", "target" },
+						new Object[] { f.getId(), "child", sourceIndex, pi }));
 			});
-		
-		return map(new String[]{"nodes", "links"}, new Object[]{nodes, rels});
+		});
+
+		return map(new String[] { "nodes", "links" }, new Object[] { nodes, rels });
 	}
-		
-		// keys and values arrays should have the same length
+
+	// keys and values arrays should have the same length
 	private Map<String, Object> map(String[] keys, Object[] values) {
 		Map<String, Object> result = new HashMap<String, Object>(keys.length);
-		for (int i=0; i<keys.length; i++) {
+		for (int i = 0; i < keys.length; i++) {
 			result.put(keys[i], values[i]);
 		}
 		return result;
 	}
 
 	@Transactional
-	public Family createFamily(User user, String husbandFirstname, String husbandLastname, String wifeFirstname, String wifeLastname) {
+	public Family createFamily(User user, String husbandFirstname, String husbandLastname, String wifeFirstname,
+			String wifeLastname) {
 //		check if it exists already
-		List<Family> flist = familyRepository.find(user.getId(), husbandFirstname, husbandLastname, wifeFirstname, wifeLastname);
+		List<Family> flist = familyRepository.find(user.getId(), husbandFirstname, husbandLastname, wifeFirstname,
+				wifeLastname);
 		if (!flist.isEmpty()) {
-			throw new ValidationException("Family already exits: " + user.getId() 
-					+ "::" + husbandFirstname + " " + husbandLastname
-					+ "::" + wifeFirstname + " " + wifeLastname );
+			throw new ValidationException("Family already exits: " + user.getId() + "::" + husbandFirstname + " "
+					+ husbandLastname + "::" + wifeFirstname + " " + wifeLastname);
 		}
 
-		Person husband = new Person(husbandFirstname, husbandLastname, Gender.M);
-		Person wife = new Person(wifeFirstname, wifeLastname, Gender.F);
+		Person husband = new Person(husbandFirstname, husbandLastname, Gender.Male, user.getId());
+		Person wife = new Person(wifeFirstname, wifeLastname, Gender.Female, user.getId());
 		return createFamily(husband, wife, user);
 	}
-		
+
 	private Family createFamily(Person husband, Person wife, User user) {
-		Family family = new Family();
-		family.setUserId(user.getId());
+		Family family = new Family(user.getId());
 		family.addParent(wife);
 		family.addParent(husband);
 		return familyRepository.save(family);
 	}
-	
+
 	@Transactional
-	public void addChild(Long childNodeId, Long familyNodeId) {
-		Family family = null;
-		Optional<Family> ofamily = familyRepository.findById(familyNodeId);
-		if (ofamily.isPresent()) {
-			family = ofamily.get();
-		} else {
-			throw new ValidationException("There is no family with id " + familyNodeId);
-		}
+	public Person createPerson(User user) {
+		Person p = new Person(user.getId());
+		personRepository.save(p);
+		return p;
+	}
 
-		Person child = null;
-		Optional<Person> ochild = personRepository.findById(childNodeId);
-		if (ochild.isPresent()) {
-			child = ochild.get();
+	@Transactional
+	public void deleteFamily(long fid, User user) {
+		// make sure the family belongs to the user
+		List<Long> userIds = new ArrayList<Long>();
+		userIds.add(user.getId());
+		List<Family> families = familyRepository.findByUserIdIn(userIds);
+		Optional<Family> family = families.stream().filter(f -> f.getId() == fid).findAny();
+		if (family.isPresent()) {
+			familyRepository.delete(family.get());
 		} else {
-			throw new ValidationException("There is no person with id " + childNodeId);
-		}
-
-		if (!family.getChildren().contains(child)) {
-			family.addChild(child);
-			familyRepository.save(family);
-		} else {
-			throw new ValidationException("Person already exists in family with id " + familyNodeId);
+			throw new SecurityException("Family with id " + fid + " does not belong to user " + user);
 		}
 	}
-	
-	@Transactional
-	public void addChild(User user, String firstname, String lastname, Gender gender, Long familyNodeId) {
-		Family family = null;
-		Optional<Family> optional = familyRepository.findById(familyNodeId);
-		if (optional.isPresent()) {
-			family = optional.get();
-		} else {
-			throw new ValidationException("There is no family with id " + familyNodeId);
-		}
 
-		Person child = new Person(firstname, lastname, gender);
-		
-		if (!family.getChildren().contains(child)) {
-//			child.setBornIn(family);
-			family.addChild(child);
-			familyRepository.save(family);
+	@Transactional
+	public void deletePerson(long pid, User user) {
+		// make sure the person belongs to the user
+		List<Long> userIds = new ArrayList<Long>();
+		userIds.add(user.getId());
+		List<Person> persons = personRepository.findByUserIdIn(userIds);
+		Person person = persons.stream().filter(p -> p.getId() == pid).findAny().orElse(null);
+		if (person != null) {
+			// delete the person from families
+			List<Family> families = familyRepository.findByUserIdIn(userIds);
+			families.forEach(f -> {
+				f.getParents().remove(person);
+				if (f.isValid()) {
+					familyRepository.save(f);
+				} else {
+					// delete invalid family
+					familyRepository.delete(f);
+				}
+			});
+			personRepository.delete(person);
 		} else {
-			throw new ValidationException("Person already exists in family with id " + familyNodeId);
+			throw new SecurityException("Person with id " + pid + " does not belong to user " + user);
 		}
 	}
-	
+
+	private void cascadeDeletePerson(Person person, User user) {
+		List<Long> userIds = new ArrayList<Long>();
+		userIds.add(user.getId());
+		List<Family> families = familyRepository.findByUserIdIn(userIds);
+		// when person is parent
+		families.forEach(f -> {
+			f.getParents().remove(person);
+			if (f.isValid()) {
+				familyRepository.save(f);
+			} else {
+				// delete invalid family
+				familyRepository.delete(f);
+			}
+		});
+
+		// when person is child
+		families.forEach(f -> {
+			f.getChildren().remove(person);
+			if (f.isValid()) {
+				familyRepository.save(f);
+			} else {
+				// delete invalid family
+				familyRepository.delete(f);
+			}
+		});
+	}
+
+	@Transactional
+	public void deleteFamilyTree(User user) {
+		List<Long> userIds = new ArrayList<Long>();
+		userIds.add(user.getId());
+		familyRepository.deleteByUserIdIn(userIds);
+		personRepository.deleteByUserIdIn(userIds);
+	}
+
 	/**
 	 * 
-	 * @return IDs of the users that delegated to the passed user up to two degrees 
+	 * @return IDs of the users that delegated to the passed user up to two degrees
 	 */
 	public Set<Long> getDelegatorIds(User user) {
 		Optional<User> ouser = userRepository.findById(user.getId());
@@ -266,6 +285,21 @@ public class FamilyTreeService {
 			u1.getDelegatedInComingFull().forEach(u2 -> delegateIds.add(u2.getId()));
 		});
 		return delegateIds;
+	}
+
+	@Transactional
+	public void savePersons(List<Person> persons) {
+		persons.forEach(p -> personRepository.save(p));
+	}
+
+	@Transactional
+	public Family saveFamily(Family family) {
+		return familyRepository.save(family);
+	}
+
+	@Transactional
+	public void saveFamilies(List<Family> families) {
+		families.forEach(f -> familyRepository.save(f));
 	}
 
 }

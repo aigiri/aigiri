@@ -17,22 +17,35 @@ public class Person {
     @Id
     @GeneratedValue
 	private Long id;
+ // TODO ygiri @Required is not working
+ 	@Required
+ 	private long userId;
+ 	
     @Required
 	private String firstname;
     @Required
 	private String lastname;
-    private Gender gender;
+    private Gender gender = Gender.Uknown;
 
 	public Person() {
 	}
 
-	public Person(String firstname, String lastname, Gender gender) {
+	public Person(long userId) {
+		this.userId = userId;
+	}
+
+	public Person(String firstname, String lastname, Gender gender, long userId) {
 		this.firstname = firstname;
 		this.lastname = lastname;
 		this.gender = gender;
+		this.userId = userId;
 	}
 	
-	public Long getId() {
+ 	public long getUserId() {
+ 		return userId;
+ 	}
+ 	
+ 	public Long getId() {
 		return id;
 	}
 
@@ -40,8 +53,16 @@ public class Person {
 		return firstname;
 	}
 
+	public void setFirstname(String firstname) {
+		this.firstname = firstname;
+	}
+
 	public String getLastname() {
 		return lastname;
+	}
+	
+	public void setLastname(String lastname) {
+		this.lastname = lastname;
 	}
 	
 	public String getFullname() {
@@ -71,7 +92,7 @@ public class Person {
 	
 	@Override
 	public String toString() {
-		return "id:" + id + " " + getFullname();
+		return "[" + id + "] " + getFullname();
 	}
 
 }

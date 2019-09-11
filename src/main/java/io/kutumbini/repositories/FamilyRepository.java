@@ -15,7 +15,7 @@ public interface FamilyRepository extends Neo4jRepository<Family, Long> {
 	List<Family> findByUserId(long userId);
 	
 //	@Query("MATCH (f:Family)-[r]-(:Person) RETURN f,r,p") // without the @Query this runs into OOM Exception
-    Iterable<Family> findAll();
+    List<Family> findAll();
 	
 //	@Query("MATCH (:Person)<-[:PARENT]-(f:Family)-[:PARENT]->(:Person)--(:User)-[*0..2]->(:User {email: {0}}) RETURN f")
 //	@Query("MATCH (:User {email: {0}})<-[*0..2]-(:User)--(f:Family)--(p:Person) RETURN f,p")
@@ -34,4 +34,7 @@ public interface FamilyRepository extends Neo4jRepository<Family, Long> {
 	@Query("MATCH (f:Family)-[:PARENT]-(:Person {firstname: {1}, lastname: {2}}), (f:Family)-[:PARENT]-(:Person {firstname: {3}, lastname: {4}})"
 			+ " WHERE f.userId = {0} RETURN f")
 	Optional<Family> findFamily(long userId, String husbandFirstname, String husbandLastname, String wifeFirstname, String wifeLastname);
+
+	Iterable<Long> deleteByUserIdIn(Iterable<Long> id);
+
 }

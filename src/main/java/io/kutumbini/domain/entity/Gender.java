@@ -1,7 +1,8 @@
 package io.kutumbini.domain.entity;
 
 public enum Gender {
-	F,// female
-	M, // male, 
-	O; // other
+	Female,
+	Male, 
+	Other,
+	Uknown;
 }

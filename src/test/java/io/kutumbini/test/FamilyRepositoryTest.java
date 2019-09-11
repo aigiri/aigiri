@@ -2,7 +2,6 @@ package io.kutumbini.test;
 
 import static org.junit.Assert.assertEquals;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -44,15 +43,6 @@ public class FamilyRepositoryTest {
 		data.setup();
 	}
 
-//	@Test
-//	public void userRequired() {
-//		// should not be able to save Person without User set on it
-//		String lastname = "Doe";
-//		personRepository.save(new Person(null, lastname, null));
-//		Collection<Person> result = publicRepository.findByLastname(lastname);
-//		assertEquals("result size", 0, result.size());
-//	}
-	
 	@Test
 	public void find() {
 		String husbandFirstname = "Amitabh";
@@ -88,10 +78,9 @@ public class FamilyRepositoryTest {
 		User user = new User();
 		user.setEmail("loadtester@k");
 		userRepository.save(user);
-		Family family = new Family();
-		family.setUserId(user.getId());
-		Person h = new Person("hf", "hl", Gender.M);
-		Person w = new Person("wf", "wl", Gender.F);
+		Family family = new Family(user.getId());
+		Person h = new Person("hf", "hl", Gender.Male, user.getId());
+		Person w = new Person("wf", "wl", Gender.Female, user.getId());
 		family.addParent(h);
 		family.addParent(w);
 		familyRepository.save(family);

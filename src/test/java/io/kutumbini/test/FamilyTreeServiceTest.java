@@ -2,6 +2,7 @@ package io.kutumbini.test;
 
 import static org.junit.Assert.assertEquals;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -20,7 +21,7 @@ import io.kutumbini.auth.persistence.dao.UserRepository;
 import io.kutumbini.auth.persistence.model.User;
 import io.kutumbini.config.AppConfig;
 import io.kutumbini.domain.entity.Family;
-import io.kutumbini.domain.entity.Gender;
+import io.kutumbini.domain.entity.Person;
 import io.kutumbini.repositories.FamilyRepository;
 import io.kutumbini.services.FamilyTreeService;
 
@@ -51,6 +52,37 @@ public class FamilyTreeServiceTest {
 	public void setUp() {
 		data.setup();
 	}
+	
+	@Test
+	public void updateFamily() {
+		Person p1 = familyTreeService.createPerson(data.u_homer);
+		Person p2 = familyTreeService.createPerson(data.u_homer);
+		Person p3 = familyTreeService.createPerson(data.u_homer);
+		Family family = new Family(data.u_homer.getId());
+		family.addChild(p1);
+		family.addParent(p2);
+		family.addParent(p3);
+		Family f = familyTreeService.saveFamily(family);
+		// modify family and save
+		f.getParents().remove(p3);
+		List<Family> families = new ArrayList<Family>();
+		families.add(f);
+		familyTreeService.saveFamilies(families);
+		List<Family> families2 = familyTreeService.getEditableFamlies(data.u_homer);
+		Family f2 = families2.stream().filter(g -> g.getId().longValue() == f.getId().longValue()).findAny().orElse(null);
+		assertEquals(1, f2.getParents().size());
+	}
+ 
+	@Test
+	public void addDeletePerson() {
+		List<Person> persons = familyTreeService.getEditablePersons(data.u_homer);
+		Person p = familyTreeService.createPerson(data.u_homer);
+		List<Person> personsAfterAdd = familyTreeService.getEditablePersons(data.u_homer);
+		assertEquals("after add", persons.size() + 1, personsAfterAdd.size());
+		familyTreeService.deletePerson(p.getId(), data.u_homer);
+		List<Person> personsAfterDelete = familyTreeService.getEditablePersons(data.u_homer);
+		assertEquals("after delete", persons.size(), personsAfterDelete.size());
+	}
  
 //	@Test(expected = ValidationException.class)
 //	public void illegalParentCycle() {
@@ -76,15 +108,15 @@ public class FamilyTreeServiceTest {
 		assertEquals("number of links", 17, links.size());
 	}
 	
-	@Test
-	public void userEditableTreeD3() {
-		Map<String, Object> map = familyTreeService.viewExtendedFamilyData(data.u_abhishek);
-		Collection nodes = (Collection) map.get("nodes");
-		Collection links = (Collection) map.get("links");
-		assertEquals("number of nodes", 10, nodes.size());
-		assertEquals("number of links", 9, links.size());
-	}
-
+//	@Test
+//	public void userEditableTreeD3() {
+//		Map<String, Object> map = familyTreeService.viewExtendedFamilyData(data.u_abhishek);
+//		Collection nodes = (Collection) map.get("nodes");
+//		Collection links = (Collection) map.get("links");
+//		assertEquals("number of nodes", 10, nodes.size());
+//		assertEquals("number of links", 9, links.size());
+//	}
+//
 	@Test
 	public void userExtendedFamilyData() {
 		Map<String, Object> map = familyTreeService.viewExtendedFamilyData(data.u_abhishek);
@@ -123,25 +155,6 @@ public class FamilyTreeServiceTest {
 		familyTreeService.createFamily(user, husbandFirstname, husbandLastname, wifeFirstname, wifeLastname);
 		List<Family> families = familyRepository.find(user.getId(), husbandFirstname, husbandLastname, wifeFirstname, wifeLastname);
 		assertEquals(1, families.size());
-	}
-	
-	@Test
-	public void addChild() {
-		User user = new User();
-		user.setEmail("ramakrishna@ntr");
-		userRepository.save(user);
-		String husbandFirstname = "Taraka Rama Rao";
-		String husbandLastname = "Nandamuri";
-		String wifeFirstname = "Basavatarakam";
-		String wifeLastname = "Nandamuri";
-		familyTreeService.createFamily(user, husbandFirstname, husbandLastname, wifeFirstname, wifeLastname);
-		List<Family> families = familyRepository.find(user.getId(), husbandFirstname, husbandLastname, wifeFirstname, wifeLastname);
-		assertEquals("family", 1, families.size());
-		
-		familyTreeService.addChild(user, "Ramakrishna", "Nandamuri", Gender.M, families.get(0).getId());
-		List<Family> families1 = familyRepository.find(user.getId(), husbandFirstname, husbandLastname, wifeFirstname, wifeLastname);
-		assertEquals("family1", 1, families1.size());
-		assertEquals("child", 1, families1.get(0).getChildren().size());
 	}
 	
 	@Test

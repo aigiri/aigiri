@@ -36,6 +36,7 @@ public class MvcConfig implements WebMvcConfigurer {
     @Autowired
     private MessageSource messageSource;
 
+ // TODO ygiri add all files under resources/templates by dynamically iterating through the files in that directory
     @Override
     public void addViewControllers(final ViewControllerRegistry registry) {
         registry.addViewController("/").setViewName("forward:/login");
@@ -43,8 +44,8 @@ public class MvcConfig implements WebMvcConfigurer {
         registry.addViewController("/sample-zoom-pan.html");
         registry.addViewController("/sample-addNode.html");
         registry.addViewController("/sample-link-arrow.html");
+        registry.addViewController("/jquery-3.4.1.js");
         registry.addViewController("/viewFamily");
-        registry.addViewController("/editFamily");
         registry.addViewController("/viewExtendedFamily");
         registry.addViewController("/login");
         registry.addViewController("/loginRememberMe");
@@ -52,11 +53,9 @@ public class MvcConfig implements WebMvcConfigurer {
         registry.addViewController("/registration.html");
         registry.addViewController("/registrationCaptcha.html");
         registry.addViewController("/logout.html");
-//        registry.addViewController("/homepage.html");
         registry.addViewController("/expiredAccount.html");
         registry.addViewController("/badUser.html");
         registry.addViewController("/emailError.html");
-//        registry.addViewController("/home.html");
         registry.addViewController("/invalidSession.html");
         registry.addViewController("/console.html");
         registry.addViewController("/admin.html");

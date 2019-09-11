@@ -49,25 +49,15 @@ public class DevData {
 		User user = new User();
 		user.setEmail("loadtester@k");
 		userRepository.save(user);
-		Family f = createFamily(user, null, 0);
-		for (int index=1; index<LIMIT; index++) {
-			f = createFamily(user, f, index);
-		}
-		System.out.println("Time in seconds on SAVE: " + (System.currentTimeMillis() - start)/1000);
-		
-		start = System.currentTimeMillis();
-		Map<String, Object> map = familyTreeService.viewExtendedFamilyData(user);
-		System.out.println("Time in seconds on FETCH: " + (System.currentTimeMillis() - start)/1000);
+//		Family f = createFamily(user, null, 0);
+//		for (int index=1; index<LIMIT; index++) {
+//			f = createFamily(user, f, index);
+//		}
+//		System.out.println("Time in seconds on SAVE: " + (System.currentTimeMillis() - start)/1000);
+//		
+//		start = System.currentTimeMillis();
+//		Map<String, Object> map = familyTreeService.viewExtendedFamilyData(user);
+//		System.out.println("Time in seconds on FETCH: " + (System.currentTimeMillis() - start)/1000);
 	}
 	
-	private Family createFamily(User user, Family g, int index) {
-		String husbandFirstname = "h_" + index;
-		String husbandLastname = "h_" + index;
-		String wifeFirstname = "w_" + index;
-		String wifeLastname = "w_" + index;
-		Family f = familyTreeService.createFamily(user, husbandFirstname, husbandLastname, wifeFirstname, wifeLastname);
-		if (g != null) familyTreeService.addChild(f.getParents().iterator().next().getId(), g.getId());
-		return f;
-	}
-
 }

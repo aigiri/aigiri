@@ -1,23 +1,13 @@
 <!DOCTYPE HTML>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ page language="java" contentType="text/html; charset=ISO-8859-1"
+    pageEncoding="ISO-8859-1"%>
 <head>
 <!-- TODO ygiri
-	Make this and other pages outstanding in appearance and usability! 
-	After ajax save, refresh the page so the table reflects the saved data on the server
 	Make table rows / cells or other fields non editable as appropriate
-	Allow entry / display of multiple spouses in the form 
 	Add spinner while ajax calls run
 	Add button next to the person row in the UI table to bring up a layover to gather additional person information,
 		photo, birth date, notes, etc.
-	If gender is not M/F the parent id will not be displayed in the UI
-		Change the UI to combine Mother/Father into one 'Parents' column that will have both IDs
-		Use a multi-select upto two parents
-	Use multi-select for the Spouses column
-	Use a dropdown for gender
-	
-	Note on UI limitation because of spousal symmetry:
-		If B is added as a spouse of A in the table, then after save, B will get added as a spouse of A
-		On the flip side, when attempting to remove spouse A for person B, 
-			need to also remove spouse B for person A in the table before saving
  -->
     <title>Edit Family Tree</title>
     <meta charset="UTF-8">
@@ -43,48 +33,59 @@
 </head>
 <body>
   <a href="viewFamily">View Family Tree</a> &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp
-<!--   <a href="viewExtendedFamily">View Extended Family Tree</a> -->
+  <a href="viewExtendedFamily">View Extended Family Tree</a>
 
 <script src="https://code.jquery.com/jquery-3.4.1.js"></script>
-<!-- <script src="jquery-3.4.1.js"></script> -->
-<!-- <script type="text/javascript" th:src="@{/jquery-3.4.1.js}"></script> -->
 
 <h1>Edit Family Tree</h1>
 </p>
-Add a person to your relatives table by clicking on the '+' button.
-<br/>
-Add Spouses and Parents by entering comma-separated IDs in those columns.
+            <c:forEach items="${familyData.keySet}" var="personid">
+<!--                 <option value="${category.id}" -->
+<!--                     <c:if test="${category.id eq selectedCatId}">selected="selected"</c:if> -->
+<!--                     > -->
+<!--                     ${category.name} -->
+<!--                 </option> -->
+				${personid}
+            </c:forEach>
+
  	<div style="overflow-x:auto;">
-			<table id="family-table" align="center">
-			    <thead>
-			        <tr>
-		            	<th><button onclick="addRow()">+</button></th>
-		            	<th th:text="${T(io.kutumbini.web.model.Constants).ID}"/>
-		                <th th:text="${T(io.kutumbini.web.model.Constants).FIRST_NAME}"/>
-		                <th th:text="${T(io.kutumbini.web.model.Constants).LAST_NAME}"/>
-		                <th th:text="${T(io.kutumbini.web.model.Constants).GENDER}"/>
-		                <th th:text="${T(io.kutumbini.web.model.Constants).SPOUSES}"/>
-		                <th th:text="${T(io.kutumbini.web.model.Constants).PARENTS}"/>
-			        </tr>
-			    </thead>
-			    <tbody>
-			        <tr th:each="row : ${session.editTableData}", contenteditable="true");>
-			        	<td><button onclick="deleteRow(this)">-</button></td>
-			            <td th:text="${row.person.id}"/>
-			            <td th:text="${row.person.firstname}"/>
-			            <td th:text="${row.person.lastname}"/>
-			            <td th:text="${row.person.gender}"/>
-			            <td th:text="${row.spouses}"/>
-			            <td th:text="${row.parents}"/>
-			        </tr>
-			    </tbody>
-			</table>
+ 	       <table id="family-table" align="center">
+            <tr>
+            	<th><button onclick="addRow()">+</button></th>
+            	<th>Id</th>
+                <th>First Name</th>
+                <th>Last Name</th>
+                <th>Gender</th>
+                <th>Spouse</th>
+                <th>Mother</th>
+                <th>Father</th>
+            </tr>
+        </table>
         <br>
         <button onclick="saveFamily()">Save</button> &nbsp; &nbsp; &nbsp;
-        <button onclick="deleteAll()">Delete All</button>
+        <button onclick="deleteFamily()">Delete Family</button>
 	</div>
  	           	
 <script>
+
+// get the data populate the table
+		$.ajax({
+			type: "GET",
+			contentType: "application/json",
+			url: "/editFamilyData",
+// 			data: tdata,
+// 			dataType: 'json',
+			cache: false,
+			timeout: 100000,
+			success: function (data) {
+				console.log("SUCCESS : ", data);
+			},
+			error: function (e) {
+				console.log("ERROR : ", e);
+			}
+		});
+
+
 
 function deleteRow(o) {
 	    r = o.parentNode.parentNode;
@@ -116,13 +117,21 @@ function deleteRow(o) {
 	  newRow.insertCell(3);
 	  // gender
 	  cell3 = newRow.insertCell(4);
+// 	  cell3.innerHTML = '<select name="gender2">
+// 				<option value="">--Please choose an option--</option>
+// 				<option value="F">Female</option>
+// 				<option value="M">Male</option>
+// 				<option value="O">Other</option>
+// 			</select>';
 	  // gender
 	  newRow.insertCell(5);
-	  // parents
+	  // mother
 	  newRow.insertCell(6);
+	  //father
+	  newRow.insertCell(7);
 	  
-	  // create person on server and get id
-	  createPerson(cell1);
+	  // add person on server and get id
+	  addPerson(cell1);
 	}
 	
 	function deletePerson(id) {
@@ -145,12 +154,12 @@ function deleteRow(o) {
 		
 	}
 
-	function deleteAll() {
+	function deleteFamily() {
 		console.log("deleting the whole family!");
 		$.ajax({
 			type: "POST",
 			contentType: "application/json",
-			url: "/deleteAll",
+			url: "/deleteFamily",
 			cache: false,
 			timeout: 100000,
 			success: function (data) {
@@ -163,11 +172,11 @@ function deleteRow(o) {
 		
 	}
 
-	function createPerson() {
+	function addPerson() {
 		$.ajax({
 			type: "POST",
 			contentType: "application/json",
-			url: "/createPerson",
+			url: "/addPerson",
 			cache: false,
 			timeout: 100000,
 			success: function (data) {
@@ -206,26 +215,22 @@ function deleteRow(o) {
 	}
 	
 	function tableData() {
+// 		var tdata = new Map();
 	    var tdata = [];
 	    var table = document.getElementById("family-table");
 	    // column names
 // 	    var names = table.rows[0].cells;
-	    var names= [];
-	    for (var i = 0, row; row = table.rows[i]; i++) {
-    	   tdata[i-1] = {};
-    	   // skip the first column
+// 	    console.log("names:", names);
+	    for (var i = 1, row; row = table.rows[i]; i++) {
+    	   //ignore the first column
+    	   tdata[i-1] = [];
     	   for (var j = 1, cell; cell = row.cells[j]; j++) {
-        	   if (i == 0) {
-            	   //top row is column names
-        		   names[j] = cell.innerHTML;
-        	   }
-        	   else {
-					tdata[i-1][names[j]] = cell.innerHTML;
-        	   }
-    	   	}
+//     	     tdata.set(names[j].innerHTML, cell.innerHTML);
+				tdata[i-1][j-1] = cell.innerHTML;
+    	   }  
     	}
-	    return tdata;
 	    
+	    return tdata;
 	}
 </script>
   

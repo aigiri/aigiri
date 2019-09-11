@@ -19,16 +19,10 @@
 </style>
 <body>
 
-  <a href="viewFamily">View Family Tree</a> &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp
-  <a href="editFamily">Edit Family Tree</a> &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp
-  <a href="viewExtendedFamily">View Extended Family Tree</a>
+<!--   <a href="viewFamily">View Family Tree</a> &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp -->
+<!--   <a href="viewExtendedFamily">View Extended Family Tree</a> &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp -->
+  <a href="editFamily">Edit Family Tree</a> 
   
-<!-- <form action="/search"> -->
-<!--     <label for="lastname">Enter last name: </label> -->
-<!--     <input type="text" name="name" id="lastname" required> -->
-<!--     <input type="submit" value="Search"> -->
-<!-- </form> -->
-
 <script src="//d3js.org/d3.v3.min.js"></script>
 <script>
 
@@ -103,7 +97,7 @@
 	                //.attr("d", d3.symbol().type( function(d) { return shape(d.label);} ) )
 	                .attr("d", d3.svg.symbol()
                  		.size(function(d) { if
-        					(d.label == 'family') { return 5000; } else { return 200;}
+        					(d.label == 'family') { return 10000; } else { return 100;}
       					})
                  		.type(function(d) { if(d.label == 'family') { return "circle"; } 
                  				else if (d.gender == 'F') { return "diamond";}

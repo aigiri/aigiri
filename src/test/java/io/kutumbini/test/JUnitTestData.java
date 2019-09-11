@@ -56,49 +56,44 @@ public class JUnitTestData {
 		userRepository.save(u_homer);
 		
 		//*************************************************** set up person nodes
-		Person p_amitabh = new Person("Amitabh", "Bachchan", Gender.M);		
-		Person p_jaya = new Person("Jaya", "Bachchan", Gender.F);
-		Person p_harivansh = new Person("Harivansh", "Bachchan", Gender.M);
-		Person p_teji = new Person("Teji", "Bachchan", Gender.F);
-		Person p_abhishek = new Person("Abhishek", "Bachchan", Gender.M);
-		Person p_aishwarya = new Person("Aishwarya", "Bachchan", Gender.F);
-		Person p_aaradhya = new Person("Aaradhya", "Bachchan", Gender.F);
-		Person p_krishnaraj = new Person("Krishnaraj", "Rai", Gender.M);
-		Person p_vrinda = new Person("Vrinda", "Rai", Gender.F);
+		Person p_amitabh = new Person("Amitabh", "Bachchan", Gender.Male, u_amitabh.getId());		
+		Person p_jaya = new Person("Jaya", "Bachchan", Gender.Female, u_amitabh.getId());
+		Person p_harivansh = new Person("Harivansh", "Bachchan", Gender.Male, u_amitabh.getId());
+		Person p_teji = new Person("Teji", "Bachchan", Gender.Female, u_amitabh.getId());
+		Person p_abhishek = new Person("Abhishek", "Bachchan", Gender.Male, u_amitabh.getId());
+		Person p_aishwarya = new Person("Aishwarya", "Bachchan", Gender.Female, u_aishwarya.getId());
+		Person p_aaradhya = new Person("Aaradhya", "Bachchan", Gender.Female, u_aishwarya.getId());
+		Person p_krishnaraj = new Person("Krishnaraj", "Rai", Gender.Male, u_aishwarya.getId());
+		Person p_vrinda = new Person("Vrinda", "Rai", Gender.Female, u_aishwarya.getId());
 
-		Person p_homer = new Person("Homer", "Simpson", Gender.M);
-		Person p_marge = new Person("Marge", "Simpson", Gender.F);
-		Person p_bart = new Person("Bart", "Simpson", Gender.M);
-		Person p_maggie = new Person("Maggie", "Simpson", Gender.F);
-		Person p_lisa = new Person("Lisa", "Simpson", Gender.F);
+		Person p_homer = new Person("Homer", "Simpson", Gender.Male, u_homer.getId());
+		Person p_marge = new Person("Marge", "Simpson", Gender.Female, u_homer.getId());
+		Person p_bart = new Person("Bart", "Simpson", Gender.Male, u_homer.getId());
+		Person p_maggie = new Person("Maggie", "Simpson", Gender.Female, u_homer.getId());
+		Person p_lisa = new Person("Lisa", "Simpson", Gender.Female, u_homer.getId());
 
 
-		Family f = new Family();
-		f.setUserId(u_amitabh.getId());
+		Family f = new Family(u_amitabh.getId());
 		f.addParent(p_teji);
 		f.addParent(p_harivansh);
 		f.addChild(p_amitabh);
 
-		Family f1 = new Family();
-		f1.setUserId(u_amitabh.getId());
+		Family f1 = new Family(u_amitabh.getId());
 		f1.addParent(p_jaya);
 		f1.addParent(p_amitabh);
 		f1.addChild(p_abhishek);
 
-		Family f2 = new Family();
-		f2.setUserId(u_abhishek.getId());
+		Family f2 = new Family(u_abhishek.getId());
 		f2.addParent(p_abhishek);
 		f2.addParent(p_aishwarya);
 		f2.addChild(p_aaradhya);
 
-		Family f3 = new Family();
-		f3.setUserId(u_aishwarya.getId());
+		Family f3 = new Family(u_aishwarya.getId());
 		f3.addParent(p_krishnaraj);
 		f3.addParent(p_vrinda);
 		f3.addChild(p_aishwarya);
 
-		Family simpsons = new Family();
-		simpsons.setUserId(u_homer.getId());
+		Family simpsons = new Family(u_homer.getId());
 		simpsons.addParent(p_homer);
 		simpsons.addParent(p_marge);
 		simpsons.addChild(p_bart);
