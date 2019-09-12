@@ -84,11 +84,12 @@ Add a new person by clicking on the '+' button. Add spouses and parents by enter
  	           	
 <script>
 
-function deleteRow(o) {
+	function deleteRow(o) {
 	    r = o.parentNode.parentNode;
 	    id = r.cells[1].innerHTML;
-	    deletePerson(id);
-// 	    console.log("id: ", id);
+
+		if (!window.confirm('Are you sure you want to delete person with id ' + id)) return;
+		deletePerson(id);
         r.parentNode.removeChild(r);
    	}
    
@@ -124,7 +125,6 @@ function deleteRow(o) {
 	}
 	
 	function deletePerson(id) {
-		console.log("deleting person with id: ", id);
 		$.ajax({
 			type: "POST",
 			contentType: "application/json",
