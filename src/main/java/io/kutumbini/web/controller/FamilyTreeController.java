@@ -89,7 +89,7 @@ public class FamilyTreeController {
 		editDataProcessor.updateSessionData(edited, getUser());
 		familyCouncelor.saveToRepository();
 		setFamilyDataInSession(session);
-		return "success";
+		return "{\"status\":\"ok\"}";
 	}
 
 	@GetMapping("/viewFamilyData")

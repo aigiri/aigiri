@@ -1,17 +1,18 @@
 <!DOCTYPE HTML>
 <head>
 <!-- TODO ygiri
-	Make this and other pages outstanding in appearance and usability! 
-	After ajax save, refresh the page so the table reflects the saved data on the server
+	Make this UI outstanding! 
+	Show error messages so data entry errors can be fixed by the user ( e.g., when an unknown ID is entered for spouse/parent )
 	Make table rows / cells or other fields non editable as appropriate
-	Must be able to tab through table cells
+	Tab through table cells
 	Allow entry / display of multiple spouses in the form 
 	Add spinner while ajax calls run
-	Add button next to the person row in the UI table to bring up a layover to gather additional person information,
-		photo, birth date, notes, etc.
 	Use a multi-select to allow selection of up to two parents
 	Use multi-select for the Spouses selection
 	Use a dropdown for gender
+	Add column sorting
+	Add button next to the person row in the UI table to bring up a layover to gather additional person information,
+		photo, birth date, notes, etc.
 	
 	Note on UI limitation because of spousal symmetry:
 		If B is added as a spouse of A in the table, then after save, B will get added as a spouse of A
@@ -21,24 +22,41 @@
     <title>Edit Family Tree</title>
     <meta charset="UTF-8">
 
-        <style>
-            table {
-                width: 70%;
-                border-collapse: collapse;
-            }
-            th, td {
-                border: 1px solid orange;
-                padding: 5px;
-  				text-align: left;
-  				height: 10px;
-  				vertical-align: bottom;
-            }
-            th {
-			  background-color: orange;
-			  color: white;
-			}
-            tr:nth-child(even) {background-color: #f2f2f2;}
-        </style>
+    <style>
+		    
+		.button {
+/*  	  background-image: url(images/button.gif); */
+/* 		  background-position: top left; */
+/* 		  background-repeat: no-repeat; */
+/* 		  background-color: #FFFFFF; */
+/* 		  width: 128px; */
+/* 		  border: 0px; */
+/* 		  margin: 7px 0 5px 7px; */
+/* 		  padding: 3px 0 6px 0; */
+		  cursor: hand;
+		  cursor: pointer;
+/* 		  color: #2C2C2C; */
+/* 		  font-family: Tahoma; */
+/* 		  font-size: 11px; */
+		}
+		
+         table {
+             width: 70%;
+             border-collapse: collapse;
+         }
+         th, td {
+             border: 1px solid orange;
+             padding: 5px;
+			text-align: left;
+			height: 10px;
+			vertical-align: bottom;
+         }
+         th {
+  background-color: orange;
+  color: white;
+}
+         tr:nth-child(even) {background-color: #f2f2f2;}
+     </style>
 </head>
 <body>
   
@@ -56,7 +74,7 @@ Add a new person by clicking on the '+' button. Add spouses and parents by enter
 			<table id="family-table" align="center">
 			    <thead>
 			        <tr>
-		            	<th><button onclick="addRow()">+</button></th>
+		            	<th><button class="button" onclick="addRow()">+</button></th>
 		            	<th th:text="${T(io.kutumbini.web.model.Constants).ID}"/>
 		                <th th:text="${T(io.kutumbini.web.model.Constants).FIRST_NAME}"/>
 		                <th th:text="${T(io.kutumbini.web.model.Constants).LAST_NAME}"/>
@@ -67,7 +85,7 @@ Add a new person by clicking on the '+' button. Add spouses and parents by enter
 			    </thead>
 			    <tbody>
 			        <tr th:each="row : ${session.editTableData}", contenteditable="true");>
-			        	<td><button onclick="deleteRow(this)">-</button></td>
+			        	<td><button class="button" onclick="deleteRow(this)">-</button></td>
 			            <td th:text="${row.person.id}"/>
 			            <td th:text="${row.person.firstname}"/>
 			            <td th:text="${row.person.lastname}"/>
@@ -78,8 +96,8 @@ Add a new person by clicking on the '+' button. Add spouses and parents by enter
 			    </tbody>
 			</table>
         <br>
-        <button onclick="saveFamily()">Save</button> &nbsp; &nbsp; &nbsp;
-        <button onclick="if(window.confirm('Are you sure you want to delete all?')) deleteAll()">Delete All</button>
+        <button class="button" onclick="saveFamily()">Save and Display Tree View</button> &nbsp; &nbsp; &nbsp;
+        <button class="button" onclick="if(window.confirm('Are you sure you want to delete all?')) deleteAll()">Delete All</button>
 	</div>
  	           	
 <script>
@@ -99,12 +117,13 @@ Add a new person by clicking on the '+' button. Add spouses and parents by enter
 
 	  // Insert a row at the beginning of the table
 	  // the 0-row is column headers
-	  newRow = table.insertRow(-1);
+	  newRow = table.insertRow(1);
+// 	  newRow = table.insertRow(-1); 
 	  newRow.setAttribute('contenteditable', 'true');
 	  // Insert cells
 	  // cell0 is the 'delete row' button
 	  cell0 = newRow.insertCell(0);
-	  cell0.innerHTML = '<button onclick="deleteRow(this)">-</button>';
+	  cell0.innerHTML = '<button class="button" onclick="deleteRow(this)">-</button>';
 	  // cell1 is person id
 	  cell1 = newRow.insertCell(1);
 // 	  cell1.innerHTML = "n-" + (table.rows.length - 1);
@@ -181,9 +200,9 @@ Add a new person by clicking on the '+' button. Add spouses and parents by enter
 	
 	function saveFamily() {
 		var tdata = tableData();
-		console.log("tdata:", tdata);
+// 		console.log("tdata:", tdata);
 		tdata = JSON.stringify(tdata);
-		console.log("json tdata:", tdata);
+// 		console.log("json tdata:", tdata);
 		
 		$.ajax({
 			type: "POST",
@@ -194,7 +213,8 @@ Add a new person by clicking on the '+' button. Add spouses and parents by enter
 			cache: false,
 			timeout: 100000,
 			success: function (data) {
-				window.location.reload();
+				console.log("Redirecting to viewFamily");
+				window.location = '/viewFamily'
 			},
 			error: function (e) {
 				console.log("ERROR : ", e);

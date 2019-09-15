@@ -1,4 +1,7 @@
 <html>
+<!--  TODO ygiri
+Provide option to show only a section of the graph, e.g., all descendants of a person / couple
+-->
 <head>
     <title>The Shared Family Community Tree</title>
 </head>
@@ -22,12 +25,14 @@
 <!--   <a href="viewFamily">View Family Tree</a> &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp -->
 <!--   <a href="viewExtendedFamily">View Extended Family Tree</a> &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp -->
   <a href="editFamily">Edit Family Tree</a> 
+
+<div id="tree">
   
 <script src="//d3js.org/d3.v3.min.js"></script>
 <script>
 
-	var width = 1960,
-	    height = 1900,
+	var width = 1300,
+	    height = 1700,
 	    color = d3.scale.category20c();
 // 	    shape = d3.scaleOrdinal(d3.symbols);
 	
@@ -52,9 +57,14 @@
 // 			.attr("markerHeight", 6) .attr("orient", "auto") .append("svg:path") .attr("d", "M0,-5L10,0L0,5");
 	
 	// AJAX call back to get the tree data
-	d3.json("/viewFamilyData", function(error, json) {
+	var json;
+	d3.json("/viewFamilyData", function(error, data) {
 	  if (error) throw error;
+	  json = data;
+	  update();
+	});
 	
+	function update() {
 	  force
 	      .nodes(json.nodes)
 	      .links(json.links)
@@ -80,6 +90,7 @@
 	      .data(json.nodes)
 	    .enter().append("g")
 	      .attr("class", "node")
+	      .on("click", click)
 	      .call(force.drag);
 	
 	//	  node.append("image")
@@ -132,8 +143,23 @@
 	
 	    node.attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; });
 	  });
-	});
+	}
+	
+	// Toggle children on click.
+	function click(d) {
+		console.log("node clicked")
+	  if (d3.event.defaultPrevented) return; // ignore drag
+	  if (d.children) {
+	    d._children = d.children;
+	    d.children = null;
+	  } else {
+	    d.children = d._children;
+	    d._children = null;
+	  }
+	  update();
+	}
 	
 </script>
+</div>
 </body>
 </html>
